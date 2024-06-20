@@ -1,4 +1,6 @@
+// lib/main.dart
 import 'package:flutter/material.dart';
+import 'add_transaction.dart'; // Import the new page
 
 void main() {
   runApp(FinanceTrackerApp());
@@ -10,7 +12,7 @@ class FinanceTrackerApp extends StatelessWidget {
     return MaterialApp(
       title: 'Finance Tracker',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.red,
       ),
       home: HomePage(),
     );
@@ -25,11 +27,15 @@ class HomePage extends StatelessWidget {
         title: Text('Finance Tracker'),
       ),
       body: Center(
-        child: Text('I Love You!'),
+        child: Text('Welcome to Finance Tracker!'),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // Navigate to Add Transaction Page
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => AddTransactionPage(),
+            ),
+          );
         },
         child: Icon(Icons.add),
       ),
