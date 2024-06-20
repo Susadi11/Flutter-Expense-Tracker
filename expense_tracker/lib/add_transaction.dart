@@ -1,7 +1,11 @@
-// lib/add_transaction.dart
 import 'package:flutter/material.dart';
+import 'db_helper.dart';
 
 class AddTransactionPage extends StatefulWidget {
+  final Function onAddTransaction; // Add this callback
+
+  AddTransactionPage({required this.onAddTransaction}); // Initialize the callback
+
   @override
   _AddTransactionPageState createState() => _AddTransactionPageState();
 }
@@ -12,7 +16,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
   final _amountController = TextEditingController();
   DateTime? _selectedDate;
 
-  void _submitData() {
+  void _submitData() async {
     if (_formKey.currentState!.validate() && _selectedDate != null) {
       final enteredTitle = _titleController.text;
       final enteredAmount = double.parse(_amountController.text);
@@ -21,8 +25,15 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
         return;
       }
 
-      // Save the transaction data
-      // This is where you would normally add the transaction to your provider or database
+      final transaction = {
+        'title': enteredTitle,
+        'amount': enteredAmount,
+        'date': _selectedDate!.toIso8601String(),
+      };
+
+      await DBHelper().insertTransaction(transaction);
+
+      widget.onAddTransaction(); // Notify parent about the new transaction
 
       Navigator.of(context).pop();
     }

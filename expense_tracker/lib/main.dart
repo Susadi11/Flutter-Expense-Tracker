@@ -1,4 +1,3 @@
-// lib/main.dart
 import 'package:flutter/material.dart';
 import 'add_transaction.dart'; // Import the new page
 import 'home_screen.dart'; // Import home screen
@@ -18,6 +17,11 @@ class FinanceTrackerApp extends StatelessWidget {
         primarySwatch: Colors.red,
       ),
       home: HomePage(),
+      routes: {
+        '/add-transaction': (ctx) => AddTransactionPage(
+          onAddTransaction: () {}, // Provide a default no-op callback
+        ),
+      },
     );
   }
 }
@@ -72,7 +76,9 @@ class _HomePageState extends State<HomePage> {
         onPressed: () {
           Navigator.of(context).push(
             MaterialPageRoute(
-              builder: (context) => AddTransactionPage(),
+              builder: (context) => AddTransactionPage(
+                onAddTransaction: () {}, // Provide a default no-op callback
+              ),
             ),
           );
         },
