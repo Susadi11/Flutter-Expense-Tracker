@@ -25,7 +25,7 @@ class HomePage extends StatelessWidget {
         title: Text('Finance Tracker'),
       ),
       body: Center(
-        child: Text('Welcome to Finance Tracker!'),
+        child: Text('I Love You!'),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
