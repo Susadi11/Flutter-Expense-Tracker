@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'db_helper.dart';
 
 class AddTransactionPage extends StatefulWidget {
-  final Function onAddTransaction; // Add this callback
+  final Function onAddTransaction;
 
-  AddTransactionPage({required this.onAddTransaction}); // Initialize the callback
+  AddTransactionPage({required this.onAddTransaction});
 
   @override
   _AddTransactionPageState createState() => _AddTransactionPageState();
@@ -15,9 +15,10 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
   final _titleController = TextEditingController();
   final _amountController = TextEditingController();
   DateTime? _selectedDate;
+  String? _selectedType; // Added a variable to store the selected type
 
   void _submitData() async {
-    if (_formKey.currentState!.validate() && _selectedDate != null) {
+    if (_formKey.currentState!.validate() && _selectedDate != null && _selectedType != null) {
       final enteredTitle = _titleController.text;
       final enteredAmount = double.parse(_amountController.text);
 
@@ -29,11 +30,19 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
         'title': enteredTitle,
         'amount': enteredAmount,
         'date': _selectedDate!.toIso8601String(),
+        'type': _selectedType, // Added the type to the transaction map
       };
 
       await DBHelper().insertTransaction(transaction);
 
-      widget.onAddTransaction(); // Notify parent about the new transaction
+      widget.onAddTransaction();
+
+      _titleController.clear();
+      _amountController.clear();
+      setState(() {
+        _selectedDate = null;
+        _selectedType = null; // Reset the selected type
+      });
 
       Navigator.of(context).pop();
     }
@@ -91,6 +100,31 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                   }
                   if (double.parse(value) <= 0) {
                     return 'Please enter an amount greater than zero.';
+                  }
+                  return null;
+                },
+              ),
+              SizedBox(height: 20),
+              DropdownButtonFormField<String>(
+                value: _selectedType,
+                onChanged: (value) {
+                  setState(() {
+                    _selectedType = value;
+                  });
+                },
+                items: ['Grocery', 'Entertainment', 'Other']
+                    .map((type) => DropdownMenuItem<String>(
+                          value: type,
+                          child: Text(type),
+                        ))
+                    .toList(),
+                decoration: InputDecoration(
+                  labelText: 'Type',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  if (value == null) {
+                    return 'Please select a type.';
                   }
                   return null;
                 },

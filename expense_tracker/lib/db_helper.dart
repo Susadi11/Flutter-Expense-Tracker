@@ -1,4 +1,3 @@
-// lib/db_helper.dart
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'dart:async';
@@ -31,7 +30,8 @@ class DBHelper {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         title TEXT,
         amount REAL,
-        date TEXT
+        date TEXT,
+        type TEXT
       )
     ''');
   }

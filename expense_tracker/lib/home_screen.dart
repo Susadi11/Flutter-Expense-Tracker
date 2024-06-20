@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'add_transaction.dart'; // Ensure this import is present
+import 'add_transaction.dart';
 import 'db_helper.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -13,17 +13,17 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _loadTransactions();
+    _transactions = _loadTransactions();
   }
 
-  void _loadTransactions() {
-    setState(() {
-      _transactions = DBHelper().getTransactions();
-    });
+  Future<List<Map<String, dynamic>>> _loadTransactions() async {
+    return await DBHelper().getTransactions();
   }
 
   void _refreshTransactions() {
-    _loadTransactions();
+    setState(() {
+      _transactions = _loadTransactions();
+    });
   }
 
   @override
@@ -38,7 +38,7 @@ class _HomeScreenState extends State<HomeScreen> {
               await Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (context) => AddTransactionPage(
-                    onAddTransaction: _refreshTransactions, // Pass the callback
+                    onAddTransaction: _refreshTransactions,
                   ),
                 ),
               );
@@ -60,14 +60,45 @@ class _HomeScreenState extends State<HomeScreen> {
             return ListView.builder(
               itemCount: transactions.length,
               itemBuilder: (ctx, index) {
-                return ListTile(
-                  title: Text(transactions[index]['title']),
-                  subtitle: Text('Amount: \$${transactions[index]['amount']}'),
-                  trailing: Text(transactions[index]['date']),
-                  onLongPress: () async {
-                    await DBHelper().deleteTransaction(transactions[index]['id']);
-                    _loadTransactions();
+                return Dismissible(
+                  key: UniqueKey(),
+                  direction: DismissDirection.startToEnd,
+                  background: Container(
+                    color: Colors.white,
+                    alignment: Alignment.centerRight,
+                    padding: EdgeInsets.only(right: 20),
+                    child: Icon(Icons.delete, color: Colors.red),
+                  ),
+                  confirmDismiss: (direction) async {
+                    return await showDialog(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        title: Text('Delete Transaction'),
+                        content: Text('Are you sure you want to delete this transaction?'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(ctx).pop(false),
+                            child: Text('Cancel'),
+                          ),
+                          TextButton(
+                            onPressed: () => Navigator.of(ctx).pop(true),
+                            child: Text('Delete'),
+                          ),
+                        ],
+                      ),
+                    );
                   },
+                  onDismissed: (direction) async {
+                    await DBHelper().deleteTransaction(transactions[index]['id']);
+                    _refreshTransactions();
+                  },
+                  child: ListTile(
+                    title: Text(transactions[index]['title']),
+                    subtitle: Text(
+                      'Amount: \$${transactions[index]['amount']} - Type: ${transactions[index]['type']}',
+                    ),
+                    trailing: Text(transactions[index]['date']),
+                  ),
                 );
               },
             );
