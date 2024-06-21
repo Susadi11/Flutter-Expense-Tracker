@@ -10,6 +10,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   late Future<List<Map<String, dynamic>>> _transactions;
   String _selectedType = 'All'; // Default selected type
+  String _selectedSort = 'Newest First'; // Default selected sort
 
   @override
   void initState() {
@@ -28,21 +29,55 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   List<Map<String, dynamic>> _filterTransactionsByType(
-      List<Map<String, dynamic>> transactions, String type) {
-    if (type == 'All') {
-      return transactions;
-    } else {
-      return transactions
-          .where((transaction) => transaction['type'] == type)
-          .toList();
-    }
+  List<Map<String, dynamic>> transactions,
+  String type,
+) {
+  if (type == 'All') {
+    return List<Map<String, dynamic>>.from(transactions); // Ensure correct return type
+  } else {
+    return List<Map<String, dynamic>>.from(transactions)
+        .where((transaction) => transaction['type'] == type)
+        .toList();
+  }
+}
+
+  void _sortTransactionsByAmount(bool ascending) {
+    _transactions.then((transactions) {
+      List<Map<String, dynamic>> mutableTransactions = List.from(transactions); // Create a mutable copy
+      mutableTransactions.sort((a, b) {
+        if (ascending) {
+          return a['amount'].compareTo(b['amount']);
+        } else {
+          return b['amount'].compareTo(a['amount']);
+        }
+      });
+      setState(() {
+        _transactions = Future.value(mutableTransactions);
+      });
+    });
+  }
+
+  void _sortTransactionsByDate(bool newestFirst) {
+    _transactions.then((transactions) {
+      List<Map<String, dynamic>> mutableTransactions = List.from(transactions); // Create a mutable copy
+      mutableTransactions.sort((a, b) {
+        if (newestFirst) {
+          return b['date'].compareTo(a['date']);
+        } else {
+          return a['date'].compareTo(b['date']);
+        }
+      });
+      setState(() {
+        _transactions = Future.value(mutableTransactions);
+      });
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Transactions'),
+        title: Text(''),
         actions: [
           DropdownButton<String>(
             value: _selectedType,
@@ -53,6 +88,34 @@ class _HomeScreenState extends State<HomeScreen> {
             },
             items: <String>['All', 'Grocery', 'Entertainment', 'Other']
                 .map<DropdownMenuItem<String>>((String value) {
+              return DropdownMenuItem<String>(
+                value: value,
+                child: Text(value),
+              );
+            }).toList(),
+          ),
+          DropdownButton<String>(
+            value: _selectedSort,
+            onChanged: (newValue) {
+              setState(() {
+                _selectedSort = newValue!;
+                if (_selectedSort == 'Amount (Ascending)') {
+                  _sortTransactionsByAmount(true);
+                } else if (_selectedSort == 'Amount (Descending)') {
+                  _sortTransactionsByAmount(false);
+                } else if (_selectedSort == 'Newest First') {
+                  _sortTransactionsByDate(true);
+                } else if (_selectedSort == 'Oldest First') {
+                  _sortTransactionsByDate(false);
+                }
+              });
+            },
+            items: <String>[
+              'Newest First',
+              'Oldest First',
+              'Amount (Ascending)',
+              'Amount (Descending)',
+            ].map<DropdownMenuItem<String>>((String value) {
               return DropdownMenuItem<String>(
                 value: value,
                 child: Text(value),
@@ -91,7 +154,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       context: context,
                       builder: (ctx) => AlertDialog(
                         title: Text('Delete Transaction'),
-                        content: Text('Are you sure you want to delete this transaction?'),
+                        content:
+                            Text('Are you sure you want to delete this transaction?'),
                         actions: [
                           TextButton(
                             onPressed: () => Navigator.of(ctx).pop(false),
@@ -106,7 +170,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     );
                   },
                   onDismissed: (direction) async {
-                    await DBHelper().deleteTransaction(filteredTransactions[index]['id']);
+                    await DBHelper().deleteTransaction(
+                        filteredTransactions[index]['id']);
                     _refreshTransactions();
                   },
                   child: ListTile(
@@ -116,7 +181,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       children: [
                         Text('Amount: ${filteredTransactions[index]['amount']}'),
                         Text('Type: ${filteredTransactions[index]['type']}'),
-                        Text('Date: ${_formatDate(filteredTransactions[index]['date'])}'), // Format date here
+                        Text(
+                            'Date: ${_formatDate(filteredTransactions[index]['date'])}'), // Format date here
                       ],
                     ),
                     trailing: Icon(Icons.arrow_forward),
