@@ -1,11 +1,18 @@
 import 'package:flutter/material.dart';
-import 'add_transaction.dart'; // Import the new page
-import 'home_screen.dart'; // Import home screen
-import 'statistics_screen.dart'; // Import statistics screen
-import 'settings_screen.dart'; // Import settings screen
+import 'package:provider/provider.dart';
+import 'theme_notifier.dart'; // Import your ThemeNotifier class
+import 'add_transaction.dart';
+import 'home_screen.dart';
+import 'statistics_screen.dart';
+import 'settings_screen.dart';
 
 void main() {
-  runApp(FinanceTrackerApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => ThemeNotifier(), // Create an instance of ThemeNotifier
+      child: FinanceTrackerApp(),
+    ),
+  );
 }
 
 class FinanceTrackerApp extends StatelessWidget {
@@ -15,13 +22,11 @@ class FinanceTrackerApp extends StatelessWidget {
       title: 'Finance Tracker',
       theme: ThemeData(
         primarySwatch: Colors.red,
+        brightness: Provider.of<ThemeNotifier>(context).isDarkTheme
+            ? Brightness.dark
+            : Brightness.light, // Use the theme from ThemeNotifier
       ),
       home: HomePage(),
-      routes: {
-        '/add-transaction': (ctx) => AddTransactionPage(
-          onAddTransaction: () {}, // Provide a default no-op callback
-        ),
-      },
     );
   }
 }

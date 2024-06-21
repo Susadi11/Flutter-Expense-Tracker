@@ -19,8 +19,9 @@ class DBHelper {
     String path = join(await getDatabasesPath(), 'transactions.db');
     return await openDatabase(
       path,
-      version: 1,
+      version: 2, // Incremented version number for schema changes
       onCreate: _onCreate,
+      onUpgrade: _onUpgrade,
     );
   }
 
@@ -34,6 +35,13 @@ class DBHelper {
         type TEXT
       )
     ''');
+  }
+
+  Future _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      // Add the `type` column to the existing table
+      await db.execute('ALTER TABLE transactions ADD COLUMN type TEXT');
+    }
   }
 
   Future<int> insertTransaction(Map<String, dynamic> transaction) async {

@@ -15,7 +15,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
   final _titleController = TextEditingController();
   final _amountController = TextEditingController();
   DateTime? _selectedDate;
-  String? _selectedType; // Added a variable to store the selected type
+  String? _selectedType;
 
   void _submitData() async {
     if (_formKey.currentState!.validate() && _selectedDate != null && _selectedType != null) {
@@ -23,6 +23,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
       final enteredAmount = double.parse(_amountController.text);
 
       if (enteredTitle.isEmpty || enteredAmount <= 0) {
+        print('Validation failed: Title is empty or amount is not greater than zero.');
         return;
       }
 
@@ -30,21 +31,30 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
         'title': enteredTitle,
         'amount': enteredAmount,
         'date': _selectedDate!.toIso8601String(),
-        'type': _selectedType, // Added the type to the transaction map
+        'type': _selectedType,
       };
 
-      await DBHelper().insertTransaction(transaction);
+      print('Transaction data to be inserted: $transaction');
 
-      widget.onAddTransaction();
+      try {
+        await DBHelper().insertTransaction(transaction);
+        print('Transaction inserted successfully.');
 
-      _titleController.clear();
-      _amountController.clear();
-      setState(() {
-        _selectedDate = null;
-        _selectedType = null; // Reset the selected type
-      });
+        widget.onAddTransaction();
 
-      Navigator.of(context).pop();
+        _titleController.clear();
+        _amountController.clear();
+        setState(() {
+          _selectedDate = null;
+          _selectedType = null;
+        });
+
+        Navigator.of(context).pop();
+      } catch (error) {
+        print('Error inserting transaction: $error');
+      }
+    } else {
+      print('Form validation failed or date/type not selected.');
     }
   }
 
