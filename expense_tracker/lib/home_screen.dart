@@ -11,6 +11,7 @@ class _HomeScreenState extends State<HomeScreen> {
   late Future<List<Map<String, dynamic>>> _transactions;
   String _selectedType = 'All'; // Default selected type
   String _selectedSort = 'Newest First'; // Default selected sort
+  String _selectedCategory = 'All'; // Default selected category
 
   @override
   void initState() {
@@ -28,18 +29,20 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  List<Map<String, dynamic>> _filterTransactionsByType(
-  List<Map<String, dynamic>> transactions,
-  String type,
-) {
-  if (type == 'All') {
-    return List<Map<String, dynamic>>.from(transactions); // Ensure correct return type
-  } else {
-    return List<Map<String, dynamic>>.from(transactions)
-        .where((transaction) => transaction['type'] == type)
-        .toList();
+  List<Map<String, dynamic>> _filterTransactionsByTypeAndCategory(
+      List<Map<String, dynamic>> transactions,
+      String type,
+      String category) {
+    return transactions.where((transaction) {
+      if (type != 'All' && transaction['type'] != type) {
+        return false;
+      }
+      if (category != 'All' && transaction['category'] != category) {
+        return false;
+      }
+      return true;
+    }).toList();
   }
-}
 
   void _sortTransactionsByAmount(bool ascending) {
     _transactions.then((transactions) {
@@ -77,7 +80,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(''),
+        title: Text('Transactions'),
         actions: [
           DropdownButton<String>(
             value: _selectedType,
@@ -87,6 +90,21 @@ class _HomeScreenState extends State<HomeScreen> {
               });
             },
             items: <String>['All', 'Grocery', 'Entertainment', 'Other']
+                .map<DropdownMenuItem<String>>((String value) {
+              return DropdownMenuItem<String>(
+                value: value,
+                child: Text(value),
+              );
+            }).toList(),
+          ),
+          DropdownButton<String>(
+            value: _selectedCategory,
+            onChanged: (newValue) {
+              setState(() {
+                _selectedCategory = newValue!;
+              });
+            },
+            items: <String>['All', 'Income', 'Expense']
                 .map<DropdownMenuItem<String>>((String value) {
               return DropdownMenuItem<String>(
                 value: value,
@@ -135,8 +153,8 @@ class _HomeScreenState extends State<HomeScreen> {
             return Center(child: Text('No transactions added yet.'));
           } else {
             final transactions = snapshot.data as List<Map<String, dynamic>>;
-            final filteredTransactions =
-                _filterTransactionsByType(transactions, _selectedType);
+            final filteredTransactions = _filterTransactionsByTypeAndCategory(
+                transactions, _selectedType, _selectedCategory);
             return ListView.builder(
               itemCount: filteredTransactions.length,
               itemBuilder: (ctx, index) {
@@ -154,8 +172,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       context: context,
                       builder: (ctx) => AlertDialog(
                         title: Text('Delete Transaction'),
-                        content:
-                            Text('Are you sure you want to delete this transaction?'),
+                        content: Text(
+                            'Are you sure you want to delete this transaction?'),
                         actions: [
                           TextButton(
                             onPressed: () => Navigator.of(ctx).pop(false),
@@ -182,6 +200,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         Text('Amount: ${filteredTransactions[index]['amount']}'),
                         Text('Type: ${filteredTransactions[index]['type']}'),
                         Text(
+                            'Category: ${filteredTransactions[index]['category']}'),
+                        Text(
                             'Date: ${_formatDate(filteredTransactions[index]['date'])}'), // Format date here
                       ],
                     ),
@@ -200,9 +220,6 @@ class _HomeScreenState extends State<HomeScreen> {
     // Assuming date is in YYYY-MM-DDTHH:MM:SS format
     List<String> parts = date.split('T');
     List<String> dateParts = parts[0].split('-');
-    if (dateParts.length == 3) {
-      return '${dateParts[2]}/${dateParts[1]}/${dateParts[0]}'; // DD/MM/YYYY format
-    }
-    return date; // Return as is if format is unexpected
+    return '${dateParts[2]}/${dateParts[1]}/${dateParts[0]}';
   }
 }

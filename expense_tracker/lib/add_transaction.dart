@@ -16,9 +16,10 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
   final _amountController = TextEditingController();
   DateTime? _selectedDate;
   String? _selectedType;
+  String? _selectedCategory;
 
   void _submitData() async {
-    if (_formKey.currentState!.validate() && _selectedDate != null && _selectedType != null) {
+    if (_formKey.currentState!.validate() && _selectedDate != null && _selectedType != null && _selectedCategory != null) {
       final enteredTitle = _titleController.text;
       final enteredAmount = double.parse(_amountController.text);
 
@@ -32,6 +33,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
         'amount': enteredAmount,
         'date': _selectedDate!.toIso8601String(),
         'type': _selectedType,
+        'category': _selectedCategory,
       };
 
       print('Transaction data to be inserted: $transaction');
@@ -47,6 +49,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
         setState(() {
           _selectedDate = null;
           _selectedType = null;
+          _selectedCategory = null;
         });
 
         Navigator.of(context).pop();
@@ -54,7 +57,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
         print('Error inserting transaction: $error');
       }
     } else {
-      print('Form validation failed or date/type not selected.');
+      print('Form validation failed or date/type/category not selected.');
     }
   }
 
@@ -135,6 +138,31 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                 validator: (value) {
                   if (value == null) {
                     return 'Please select a type.';
+                  }
+                  return null;
+                },
+              ),
+              SizedBox(height: 20),
+              DropdownButtonFormField<String>(
+                value: _selectedCategory,
+                onChanged: (value) {
+                  setState(() {
+                    _selectedCategory = value;
+                  });
+                },
+                items: ['Income', 'Expense']
+                    .map((category) => DropdownMenuItem<String>(
+                          value: category,
+                          child: Text(category),
+                        ))
+                    .toList(),
+                decoration: InputDecoration(
+                  labelText: 'Category',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  if (value == null) {
+                    return 'Please select a category.';
                   }
                   return null;
                 },
