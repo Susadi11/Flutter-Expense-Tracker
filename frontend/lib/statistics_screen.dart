@@ -30,8 +30,8 @@ class StatisticsScreen extends StatelessWidget {
                   ),
                   SizedBox(height: 20),
                   StatisticItem(
-                    label: 'Number of Transactions This Week',
-                    value: stats['transactionsThisWeek'].toString(),
+                    label: 'Total Transactions',
+                    value: stats['totalTransactions'].toString(),
                   ),
                   StatisticItem(
                     label: 'Total Income',
@@ -41,7 +41,10 @@ class StatisticsScreen extends StatelessWidget {
                     label: 'Total Expenses',
                     value: '\$${stats['totalExpenses'].toStringAsFixed(2)}',
                   ),
-                  // Add more StatisticItem widgets as needed
+                  StatisticItem(
+                    label: 'Net Balance',
+                    value: '\$${(stats['totalIncome'] - stats['totalExpenses']).toStringAsFixed(2)}',
+                  ),
                 ],
               );
             }
@@ -53,35 +56,28 @@ class StatisticsScreen extends StatelessWidget {
 
   Future<Map<String, dynamic>> _calculateStatistics() async {
     final transactions = await DBHelper().getTransactions();
-    final now = DateTime.now();
-    final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
-
-    int transactionsThisWeek = 0;
+    
+    int totalTransactions = transactions.length;
     double totalIncome = 0.0;
     double totalExpenses = 0.0;
 
     for (var transaction in transactions) {
-      final transactionDate = DateTime.parse(transaction['date']);
-      if (transactionDate.isAfter(startOfWeek)) {
-        transactionsThisWeek++;
-      }
-      final amount = transaction['amount'];
-      if (transaction['type'] == 'Income') {
+      final amount = transaction['amount'] as double;
+      if (transaction['category'] == 'Income') {
         totalIncome += amount;
-      } else if (transaction['type'] == 'Expense') {
+      } else if (transaction['category'] == 'Expense') {
         totalExpenses += amount;
       }
     }
 
     return {
-      'transactionsThisWeek': transactionsThisWeek,
+      'totalTransactions': totalTransactions,
       'totalIncome': totalIncome,
       'totalExpenses': totalExpenses,
     };
   }
 }
 
-// Custom widget for displaying a single statistic item
 class StatisticItem extends StatelessWidget {
   final String label;
   final String value;

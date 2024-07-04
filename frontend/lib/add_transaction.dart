@@ -29,12 +29,12 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
       }
 
       final transaction = {
-        'title': enteredTitle,
-        'amount': enteredAmount,
-        'date': _selectedDate!.toIso8601String(),
-        'type': _selectedType,
-        'category': _selectedCategory,
-      };
+  'title': enteredTitle,
+  'amount': enteredAmount,
+  'date': _selectedDate!.toIso8601String(),
+  'type': _selectedType,
+  'category': _selectedCategory, // Make sure this is either 'Income' or 'Expense'
+};
 
       print('Transaction data to be inserted: $transaction');
 
