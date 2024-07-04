@@ -29,12 +29,12 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
       }
 
       final transaction = {
-  'title': enteredTitle,
-  'amount': enteredAmount,
-  'date': _selectedDate!.toIso8601String(),
-  'type': _selectedType,
-  'category': _selectedCategory, // Make sure this is either 'Income' or 'Expense'
-};
+        'title': enteredTitle,
+        'amount': enteredAmount,
+        'date': _selectedDate!.toIso8601String(),
+        'type': _selectedType,
+        'category': _selectedCategory,
+      };
 
       print('Transaction data to be inserted: $transaction');
 
@@ -143,29 +143,34 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                 },
               ),
               SizedBox(height: 20),
-              DropdownButtonFormField<String>(
-                value: _selectedCategory,
-                onChanged: (value) {
-                  setState(() {
-                    _selectedCategory = value;
-                  });
-                },
-                items: ['Income', 'Expense']
-                    .map((category) => DropdownMenuItem<String>(
-                          value: category,
-                          child: Text(category),
-                        ))
-                    .toList(),
-                decoration: InputDecoration(
-                  labelText: 'Category',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) {
-                  if (value == null) {
-                    return 'Please select a category.';
-                  }
-                  return null;
-                },
+              Text('Category'),
+              Row(
+                children: [
+                  Expanded(
+                    child: RadioListTile<String>(
+                      title: Text('Income'),
+                      value: 'Income',
+                      groupValue: _selectedCategory,
+                      onChanged: (value) {
+                        setState(() {
+                          _selectedCategory = value;
+                        });
+                      },
+                    ),
+                  ),
+                  Expanded(
+                    child: RadioListTile<String>(
+                      title: Text('Expense'),
+                      value: 'Expense',
+                      groupValue: _selectedCategory,
+                      onChanged: (value) {
+                        setState(() {
+                          _selectedCategory = value;
+                        });
+                      },
+                    ),
+                  ),
+                ],
               ),
               SizedBox(height: 20),
               Row(
