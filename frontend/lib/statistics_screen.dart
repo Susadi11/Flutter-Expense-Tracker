@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'db_helper.dart';
+import 'pie_chart.dart';
 
 class StatisticsScreen extends StatelessWidget {
   @override
@@ -18,34 +19,48 @@ class StatisticsScreen extends StatelessWidget {
               return Center(child: Text('No data available'));
             } else {
               final stats = snapshot.data!;
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Summary Statistics',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
+              return SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Summary Statistics',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-                  SizedBox(height: 20),
-                  StatisticItem(
-                    label: 'Total Transactions',
-                    value: stats['totalTransactions'].toString(),
-                  ),
-                  StatisticItem(
-                    label: 'Total Income',
-                    value: '\$${stats['totalIncome'].toStringAsFixed(2)}',
-                  ),
-                  StatisticItem(
-                    label: 'Total Expenses',
-                    value: '\$${stats['totalExpenses'].toStringAsFixed(2)}',
-                  ),
-                  StatisticItem(
-                    label: 'Net Balance',
-                    value: '\$${(stats['totalIncome'] - stats['totalExpenses']).toStringAsFixed(2)}',
-                  ),
-                ],
+                    SizedBox(height: 20),
+                    StatisticItem(
+                      label: 'Total Transactions',
+                      value: stats['totalTransactions'].toString(),
+                    ),
+                    StatisticItem(
+                      label: 'Total Income',
+                      value: '\$${stats['totalIncome'].toStringAsFixed(2)}',
+                    ),
+                    StatisticItem(
+                      label: 'Total Expenses',
+                      value: '\$${stats['totalExpenses'].toStringAsFixed(2)}',
+                    ),
+                    StatisticItem(
+                      label: 'Net Balance',
+                      value: '\$${(stats['totalIncome'] - stats['totalExpenses']).toStringAsFixed(2)}',
+                    ),
+                    SizedBox(height: 40),
+                    Text(
+                      'Weekly Expenses',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                    PieChart(
+                      data: _convertToPercentages(stats['weeklyExpenses']),
+                    ),
+                  ],
+                ),
               );
             }
           },
@@ -60,13 +75,27 @@ class StatisticsScreen extends StatelessWidget {
     int totalTransactions = transactions.length;
     double totalIncome = 0.0;
     double totalExpenses = 0.0;
+    Map<String, double> weeklyExpenses = {
+      'Grocery': 0.0,
+      'Entertainment': 0.0,
+      'Other': 0.0,
+    };
+
+    final now = DateTime.now();
+    final oneWeekAgo = now.subtract(Duration(days: 7));
 
     for (var transaction in transactions) {
       final amount = transaction['amount'] as double;
+      final date = DateTime.parse(transaction['date']);
+      final type = transaction['type'] as String;
+      
       if (transaction['category'] == 'Income') {
         totalIncome += amount;
       } else if (transaction['category'] == 'Expense') {
         totalExpenses += amount;
+        if (date.isAfter(oneWeekAgo) && date.isBefore(now)) {
+          weeklyExpenses[type] = (weeklyExpenses[type] ?? 0.0) + amount;
+        }
       }
     }
 
@@ -74,7 +103,13 @@ class StatisticsScreen extends StatelessWidget {
       'totalTransactions': totalTransactions,
       'totalIncome': totalIncome,
       'totalExpenses': totalExpenses,
+      'weeklyExpenses': weeklyExpenses,
     };
+  }
+
+  Map<String, double> _convertToPercentages(Map<String, double> expenses) {
+    double total = expenses.values.reduce((a, b) => a + b);
+    return expenses.map((key, value) => MapEntry(key, value / total));
   }
 }
 
