@@ -3,6 +3,18 @@ import 'db_helper.dart';
 import 'pie_chart.dart';
 
 class StatisticsScreen extends StatelessWidget {
+  final List<Color> expenseColors = [
+    Colors.red,
+    Colors.orange,
+    Colors.yellow,
+  ];
+
+  final List<Color> incomeColors = [
+    Colors.green,
+    Colors.blue,
+    Colors.purple,
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -58,6 +70,20 @@ class StatisticsScreen extends StatelessWidget {
                     SizedBox(height: 20),
                     PieChart(
                       data: _convertToPercentages(stats['weeklyExpenses']),
+                      colors: expenseColors,
+                    ),
+                    SizedBox(height: 40),
+                    Text(
+                      'Weekly Incomes',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                    PieChart(
+                      data: _convertToPercentages(stats['weeklyIncomes']),
+                      colors: incomeColors,
                     ),
                   ],
                 ),
@@ -80,6 +106,7 @@ class StatisticsScreen extends StatelessWidget {
       'Entertainment': 0.0,
       'Other': 0.0,
     };
+    Map<String, double> weeklyIncomes = {};
 
     final now = DateTime.now();
     final oneWeekAgo = now.subtract(Duration(days: 7));
@@ -91,6 +118,9 @@ class StatisticsScreen extends StatelessWidget {
       
       if (transaction['category'] == 'Income') {
         totalIncome += amount;
+        if (date.isAfter(oneWeekAgo) && date.isBefore(now)) {
+          weeklyIncomes[type] = (weeklyIncomes[type] ?? 0.0) + amount;
+        }
       } else if (transaction['category'] == 'Expense') {
         totalExpenses += amount;
         if (date.isAfter(oneWeekAgo) && date.isBefore(now)) {
@@ -104,12 +134,13 @@ class StatisticsScreen extends StatelessWidget {
       'totalIncome': totalIncome,
       'totalExpenses': totalExpenses,
       'weeklyExpenses': weeklyExpenses,
+      'weeklyIncomes': weeklyIncomes,
     };
   }
 
-  Map<String, double> _convertToPercentages(Map<String, double> expenses) {
-    double total = expenses.values.reduce((a, b) => a + b);
-    return expenses.map((key, value) => MapEntry(key, value / total));
+  Map<String, double> _convertToPercentages(Map<String, double> data) {
+    double total = data.values.reduce((a, b) => a + b);
+    return data.map((key, value) => MapEntry(key, value / total));
   }
 }
 

@@ -3,35 +3,30 @@ import 'package:flutter/material.dart';
 
 class PieChart extends StatelessWidget {
   final Map<String, double> data;
+  final List<Color> colors;
 
-  PieChart({required this.data});
+  PieChart({required this.data, required this.colors});
 
   @override
   Widget build(BuildContext context) {
-    final List<Color> colors = [
-      Colors.cyan,
-      Colors.blue,
-      Colors.orange,
-    ];
-
     return Column(
-      mainAxisSize: MainAxisSize.min, // Ensure the column size is minimized to content
+      mainAxisSize: MainAxisSize.min,
       children: [
         Center(
           child: SizedBox(
-            width: 240, // Slightly larger width
-            height: 240, // Slightly larger height
+            width: 240,
+            height: 240,
             child: CustomPaint(
               painter: PieChartPainter(data: data, colors: colors),
               size: Size.infinite,
             ),
           ),
         ),
-        SizedBox(height: 20), // Increase space between chart and legend
+        SizedBox(height: 20),
         Wrap(
-          alignment: WrapAlignment.start, // Align legend to start
-          spacing: 12.0, // Horizontal space between legends
-          runSpacing: 8.0, // Vertical space between legends
+          alignment: WrapAlignment.start,
+          spacing: 12.0,
+          runSpacing: 8.0,
           children: data.entries.map((entry) {
             final index = data.keys.toList().indexOf(entry.key);
             return Row(
@@ -40,9 +35,9 @@ class PieChart extends StatelessWidget {
                 Container(
                   width: 12,
                   height: 12,
-                  color: colors[index],
+                  color: colors[index % colors.length],
                 ),
-                SizedBox(width: 6), // Increase space between color box and text
+                SizedBox(width: 6),
                 Text('${entry.key}: ${(entry.value * 100).toStringAsFixed(0)}%'),
               ],
             );
@@ -65,26 +60,24 @@ class PieChartPainter extends CustomPainter {
     final radius = size.width / 2;
     final rect = Rect.fromCircle(center: center, radius: radius);
 
-    double startAngle = -pi / 2; // Start from the top
+    double startAngle = -pi / 2;
 
-    for (int i = 0; i < data.length; i++) {
-      final value = data.values.elementAt(i);
-      final sweepAngle = value * 2 * pi;
+    data.entries.toList().asMap().forEach((index, entry) {
+      final sweepAngle = entry.value * 2 * pi;
 
       final paint = Paint()
         ..style = PaintingStyle.fill
-        ..color = colors[i];
+        ..color = colors[index % colors.length];
 
       canvas.drawArc(rect, startAngle, sweepAngle, true, paint);
 
-      // Draw percentage text
-      final percentage = (value * 100).toStringAsFixed(0) + '%';
+      final percentage = (entry.value * 100).toStringAsFixed(0) + '%';
       final textPainter = TextPainter(
         text: TextSpan(
           text: percentage,
           style: TextStyle(
             color: Colors.white,
-            fontSize: 14, // Adjust font size if needed
+            fontSize: 14,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -98,7 +91,7 @@ class PieChartPainter extends CustomPainter {
       textPainter.paint(canvas, Offset(textX, textY));
 
       startAngle += sweepAngle;
-    }
+    });
   }
 
   @override
