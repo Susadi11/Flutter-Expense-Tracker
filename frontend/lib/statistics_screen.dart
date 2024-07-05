@@ -18,6 +18,9 @@ class StatisticsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text('Statistics'),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: FutureBuilder<Map<String, dynamic>>(
@@ -58,6 +61,19 @@ class StatisticsScreen extends StatelessWidget {
                     StatisticItem(
                       label: 'Net Balance',
                       value: '\$${(stats['totalIncome'] - stats['totalExpenses']).toStringAsFixed(2)}',
+                    ),
+                    SizedBox(height: 40),
+                    Text(
+                      'Income vs Expenses',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                    IncomeExpenseProbabilityBar(
+                      incomePercentage: stats['incomePercentage'],
+                      expensePercentage: stats['expensePercentage'],
                     ),
                     SizedBox(height: 40),
                     if (stats['weeklyExpenses'].isNotEmpty) ...[
@@ -107,6 +123,8 @@ class StatisticsScreen extends StatelessWidget {
         'totalTransactions': 0,
         'totalIncome': 0.0,
         'totalExpenses': 0.0,
+        'incomePercentage': 0.0,
+        'expensePercentage': 0.0,
         'weeklyExpenses': {},
         'weeklyIncomes': {},
       };
@@ -143,10 +161,16 @@ class StatisticsScreen extends StatelessWidget {
       }
     }
 
+    double total = totalIncome + totalExpenses;
+    double incomePercentage = total > 0 ? (totalIncome / total) * 100 : 0;
+    double expensePercentage = total > 0 ? (totalExpenses / total) * 100 : 0;
+
     return {
       'totalTransactions': totalTransactions,
       'totalIncome': totalIncome,
       'totalExpenses': totalExpenses,
+      'incomePercentage': incomePercentage,
+      'expensePercentage': expensePercentage,
       'weeklyExpenses': weeklyExpenses,
       'weeklyIncomes': weeklyIncomes,
     };
@@ -188,6 +212,75 @@ class StatisticItem extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class IncomeExpenseProbabilityBar extends StatelessWidget {
+  final double incomePercentage;
+  final double expensePercentage;
+
+  const IncomeExpenseProbabilityBar({
+    Key? key,
+    required this.incomePercentage,
+    required this.expensePercentage,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text('Income', style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold)),
+            Text('Expenses', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+          ],
+        ),
+        SizedBox(height: 8),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text('${incomePercentage.toStringAsFixed(1)}%'),
+            Text('${expensePercentage.toStringAsFixed(1)}%'),
+          ],
+        ),
+        SizedBox(height: 8),
+        Container(
+          height: 20,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                flex: incomePercentage.round(),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.green,
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(10),
+                      bottomLeft: Radius.circular(10),
+                    ),
+                  ),
+                ),
+              ),
+              Expanded(
+                flex: expensePercentage.round(),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.red,
+                    borderRadius: BorderRadius.only(
+                      topRight: Radius.circular(10),
+                      bottomRight: Radius.circular(10),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
