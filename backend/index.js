@@ -1,4 +1,3 @@
-
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
@@ -18,7 +17,8 @@ mongoose.connect('mongodb+srv://it22079404:86OIVhDTw9v4ANUI@expenses.xd59dkt.mon
   console.error('Error connecting to MongoDB:', err);
 });
 
-app.use('/', transactionRoutes);
+// Mount transaction routes
+app.use('/api', transactionRoutes);
 
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
