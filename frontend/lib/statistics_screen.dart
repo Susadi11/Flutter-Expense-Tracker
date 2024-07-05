@@ -27,8 +27,8 @@ class StatisticsScreen extends StatelessWidget {
               return Center(child: CircularProgressIndicator());
             } else if (snapshot.hasError) {
               return Center(child: Text('Error: ${snapshot.error}'));
-            } else if (!snapshot.hasData) {
-              return Center(child: Text('No data available'));
+            } else if (!snapshot.hasData || snapshot.data!['totalTransactions'] == 0) {
+              return Center(child: Text('No records to display stats.'));
             } else {
               final stats = snapshot.data!;
               return SingleChildScrollView(
@@ -60,31 +60,35 @@ class StatisticsScreen extends StatelessWidget {
                       value: '\$${(stats['totalIncome'] - stats['totalExpenses']).toStringAsFixed(2)}',
                     ),
                     SizedBox(height: 40),
-                    Text(
-                      'Weekly Expenses',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
+                    if (stats['weeklyExpenses'].isNotEmpty) ...[
+                      Text(
+                        'Weekly Expenses',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                    SizedBox(height: 20),
-                    PieChart(
-                      data: _convertToPercentages(stats['weeklyExpenses']),
-                      colors: expenseColors,
-                    ),
-                    SizedBox(height: 40),
-                    Text(
-                      'Weekly Incomes',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
+                      SizedBox(height: 20),
+                      PieChart(
+                        data: _convertToPercentages(stats['weeklyExpenses']),
+                        colors: expenseColors,
                       ),
-                    ),
-                    SizedBox(height: 20),
-                    PieChart(
-                      data: _convertToPercentages(stats['weeklyIncomes']),
-                      colors: incomeColors,
-                    ),
+                      SizedBox(height: 40),
+                    ],
+                    if (stats['weeklyIncomes'].isNotEmpty) ...[
+                      Text(
+                        'Weekly Incomes',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(height: 20),
+                      PieChart(
+                        data: _convertToPercentages(stats['weeklyIncomes']),
+                        colors: incomeColors,
+                      ),
+                    ],
                   ],
                 ),
               );
@@ -97,7 +101,17 @@ class StatisticsScreen extends StatelessWidget {
 
   Future<Map<String, dynamic>> _calculateStatistics() async {
     final transactions = await DBHelper().getTransactions();
-    
+
+    if (transactions.isEmpty) {
+      return {
+        'totalTransactions': 0,
+        'totalIncome': 0.0,
+        'totalExpenses': 0.0,
+        'weeklyExpenses': {},
+        'weeklyIncomes': {},
+      };
+    }
+
     int totalTransactions = transactions.length;
     double totalIncome = 0.0;
     double totalExpenses = 0.0;
@@ -115,7 +129,7 @@ class StatisticsScreen extends StatelessWidget {
       final amount = transaction['amount'] as double;
       final date = DateTime.parse(transaction['date']);
       final type = transaction['type'] as String;
-      
+
       if (transaction['category'] == 'Income') {
         totalIncome += amount;
         if (date.isAfter(oneWeekAgo) && date.isBefore(now)) {
@@ -139,7 +153,10 @@ class StatisticsScreen extends StatelessWidget {
   }
 
   Map<String, double> _convertToPercentages(Map<String, double> data) {
-    double total = data.values.reduce((a, b) => a + b);
+    double total = data.values.fold(0, (a, b) => a + b);
+    if (total == 0) {
+      return {}; // Return an empty map if there's no data
+    }
     return data.map((key, value) => MapEntry(key, value / total));
   }
 }
