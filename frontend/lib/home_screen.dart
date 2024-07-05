@@ -9,9 +9,9 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   late Future<List<Map<String, dynamic>>> _transactions;
-  String _selectedType = 'All'; // Default selected type
-  String _selectedSort = 'Newest First'; // Default selected sort
-  String _selectedCategory = 'All'; // Default selected category
+  String _selectedType = 'All';
+  String _selectedSort = 'Newest First';
+  String _selectedCategory = 'All';
 
   @override
   void initState() {
@@ -46,7 +46,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _sortTransactionsByAmount(bool ascending) {
     _transactions.then((transactions) {
-      List<Map<String, dynamic>> mutableTransactions = List.from(transactions); // Create a mutable copy
+      List<Map<String, dynamic>> mutableTransactions = List.from(transactions);
       mutableTransactions.sort((a, b) {
         if (ascending) {
           return a['amount'].compareTo(b['amount']);
@@ -62,7 +62,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _sortTransactionsByDate(bool newestFirst) {
     _transactions.then((transactions) {
-      List<Map<String, dynamic>> mutableTransactions = List.from(transactions); // Create a mutable copy
+      List<Map<String, dynamic>> mutableTransactions = List.from(transactions);
       mutableTransactions.sort((a, b) {
         if (newestFirst) {
           return b['date'].compareTo(a['date']);
@@ -199,13 +199,23 @@ class _HomeScreenState extends State<HomeScreen> {
                       children: [
                         Text('Amount: ${filteredTransactions[index]['amount']}'),
                         Text('Type: ${filteredTransactions[index]['type']}'),
-                        Text(
-                            'Category: ${filteredTransactions[index]['category']}'),
-                        Text(
-                            'Date: ${_formatDate(filteredTransactions[index]['date'])}'), // Format date here
+                        Text('Category: ${filteredTransactions[index]['category']}'),
+                        Text('Date: ${_formatDate(filteredTransactions[index]['date'])}'),
                       ],
                     ),
-                    trailing: Icon(Icons.arrow_forward),
+                    trailing: IconButton(
+                      icon: Icon(Icons.arrow_forward),
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => AddTransactionPage(
+                              onAddTransaction: _refreshTransactions,
+                              transactionToEdit: filteredTransactions[index],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
                   ),
                 );
               },
@@ -217,7 +227,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   String _formatDate(String date) {
-    // Assuming date is in YYYY-MM-DDTHH:MM:SS format
     List<String> parts = date.split('T');
     List<String> dateParts = parts[0].split('-');
     return '${dateParts[2]}/${dateParts[1]}/${dateParts[0]}';

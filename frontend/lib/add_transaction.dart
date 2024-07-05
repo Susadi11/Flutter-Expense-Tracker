@@ -3,8 +3,9 @@ import 'db_helper.dart';
 
 class AddTransactionPage extends StatefulWidget {
   final Function onAddTransaction;
+  final Map<String, dynamic>? transactionToEdit;
 
-  AddTransactionPage({required this.onAddTransaction});
+  AddTransactionPage({required this.onAddTransaction, this.transactionToEdit});
 
   @override
   _AddTransactionPageState createState() => _AddTransactionPageState();
@@ -17,6 +18,18 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
   DateTime? _selectedDate;
   String? _selectedType;
   String? _selectedCategory;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.transactionToEdit != null) {
+      _titleController.text = widget.transactionToEdit!['title'];
+      _amountController.text = widget.transactionToEdit!['amount'].toString();
+      _selectedDate = DateTime.parse(widget.transactionToEdit!['date']);
+      _selectedType = widget.transactionToEdit!['type'];
+      _selectedCategory = widget.transactionToEdit!['category'];
+    }
+  }
 
   void _submitData() async {
     if (_formKey.currentState!.validate() && _selectedDate != null && _selectedType != null && _selectedCategory != null) {
@@ -36,25 +49,22 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
         'category': _selectedCategory,
       };
 
-      print('Transaction data to be inserted: $transaction');
-
       try {
-        await DBHelper().insertTransaction(transaction);
-        print('Transaction inserted successfully.');
+        if (widget.transactionToEdit != null) {
+          // Update existing transaction
+          await DBHelper().updateTransaction(widget.transactionToEdit!['id'], transaction);
+          print('Transaction updated successfully.');
+        } else {
+          // Insert new transaction
+          await DBHelper().insertTransaction(transaction);
+          print('Transaction inserted successfully.');
+        }
 
         widget.onAddTransaction();
 
-        _titleController.clear();
-        _amountController.clear();
-        setState(() {
-          _selectedDate = null;
-          _selectedType = null;
-          _selectedCategory = null;
-        });
-
         Navigator.of(context).pop();
       } catch (error) {
-        print('Error inserting transaction: $error');
+        print('Error saving transaction: $error');
       }
     } else {
       print('Form validation failed or date/type/category not selected.');
@@ -64,7 +74,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
   void _presentDatePicker() {
     showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
+      initialDate: _selectedDate ?? DateTime.now(),
       firstDate: DateTime(2000),
       lastDate: DateTime.now(),
     ).then((pickedDate) {
@@ -81,7 +91,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Add Transaction'),
+        title: Text(widget.transactionToEdit != null ? 'Edit Transaction' : 'Add Transaction'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -194,7 +204,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
               SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _submitData,
-                child: Text('Add Transaction'),
+                child: Text(widget.transactionToEdit != null ? 'Update Transaction' : 'Add Transaction'),
               ),
             ],
           ),

@@ -61,4 +61,14 @@ class DBHelper {
     final db = await database;
     return await db.delete('transactions', where: 'id = ?', whereArgs: [id]);
   }
+
+  Future<int> updateTransaction(int id, Map<String, dynamic> transaction) async {
+  final db = await database;
+  return await db.update(
+    'transactions',
+    transaction,
+    where: 'id = ?',
+    whereArgs: [id],
+  );
+}
 }
