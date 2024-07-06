@@ -1,6 +1,8 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'dart:async';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class DBHelper {
   static final DBHelper _instance = DBHelper._internal();
@@ -19,7 +21,7 @@ class DBHelper {
     String path = join(await getDatabasesPath(), 'transactions.db');
     return await openDatabase(
       path,
-      version: 3, // Incremented version number for schema changes
+      version: 3,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
@@ -63,12 +65,33 @@ class DBHelper {
   }
 
   Future<int> updateTransaction(int id, Map<String, dynamic> transaction) async {
-  final db = await database;
-  return await db.update(
-    'transactions',
-    transaction,
-    where: 'id = ?',
-    whereArgs: [id],
-  );
-}
+    final db = await database;
+    return await db.update(
+      'transactions',
+      transaction,
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  Future<void> sendDataToMongoDB() async {
+    final db = await database;
+    final List<Map<String, dynamic>> transactions = await getTransactions();
+
+    for (var transaction in transactions) {
+      final response = await http.post(
+        Uri.parse('https://expense-tracker-livid-two.vercel.app/transactions'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(transaction),
+      );
+
+      if (response.statusCode == 201) {
+        print('Transaction sent to MongoDB successfully');
+      } else {
+        print('Failed to send transaction to MongoDB');
+      }
+    }
+  }
 }
