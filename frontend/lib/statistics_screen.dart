@@ -4,7 +4,7 @@ import 'pie_chart.dart';
 
 class StatisticsScreen extends StatelessWidget {
   final List<Color> expenseColors = [
-    Colors.red,
+    Color.fromARGB(255, 244, 67, 54),
     Colors.orange,
     Colors.yellow,
   ];
@@ -31,7 +31,7 @@ class StatisticsScreen extends StatelessWidget {
             } else if (snapshot.hasError) {
               return Center(child: Text('Error: ${snapshot.error}'));
             } else if (!snapshot.hasData || snapshot.data!['totalTransactions'] == 0) {
-              return Center(child: Text('No records to display stats.'));
+              return Center(child: Text('No records to display stats for this week.'));
             } else {
               final stats = snapshot.data!;
               return SingleChildScrollView(
@@ -39,7 +39,7 @@ class StatisticsScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Summary Statistics',
+                      'Current Week Statistics',
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
@@ -77,12 +77,18 @@ class StatisticsScreen extends StatelessWidget {
                     ),
                     SizedBox(height: 40),
                     if (stats['weeklyExpenses'].isNotEmpty) ...[
-                      Text(
-                        'Weekly Expenses',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Weekly Expenses',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          RateWidget(rate: stats['expenseRate'], isExpense: true),
+                        ],
                       ),
                       SizedBox(height: 20),
                       PieChart(
@@ -92,12 +98,18 @@ class StatisticsScreen extends StatelessWidget {
                       SizedBox(height: 40),
                     ],
                     if (stats['weeklyIncomes'].isNotEmpty) ...[
-                      Text(
-                        'Weekly Incomes',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Weekly Incomes',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          RateWidget(rate: stats['incomeRate'], isExpense: false),
+                        ],
                       ),
                       SizedBox(height: 20),
                       PieChart(
@@ -127,12 +139,16 @@ class StatisticsScreen extends StatelessWidget {
         'expensePercentage': 0.0,
         'weeklyExpenses': {},
         'weeklyIncomes': {},
+        'expenseRate': 0.0,
+        'incomeRate': 0.0,
       };
     }
 
-    int totalTransactions = transactions.length;
+    int totalTransactions = 0;
     double totalIncome = 0.0;
     double totalExpenses = 0.0;
+    double lastWeekExpenses = 0.0;
+    double lastWeekIncome = 0.0;
     Map<String, double> weeklyExpenses = {
       'Grocery': 0.0,
       'Entertainment': 0.0,
@@ -141,22 +157,30 @@ class StatisticsScreen extends StatelessWidget {
     Map<String, double> weeklyIncomes = {};
 
     final now = DateTime.now();
-    final oneWeekAgo = now.subtract(Duration(days: 7));
+    final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
+    final endOfWeek = startOfWeek.add(Duration(days: 6));
+    final startOfLastWeek = startOfWeek.subtract(Duration(days: 7));
 
     for (var transaction in transactions) {
       final amount = transaction['amount'] as double;
       final date = DateTime.parse(transaction['date']);
       final type = transaction['type'] as String;
 
-      if (transaction['category'] == 'Income') {
-        totalIncome += amount;
-        if (date.isAfter(oneWeekAgo) && date.isBefore(now)) {
+      if (date.isAfter(startOfWeek.subtract(Duration(days: 1))) && date.isBefore(endOfWeek.add(Duration(days: 1)))) {
+        totalTransactions++;
+        
+        if (transaction['category'] == 'Income') {
+          totalIncome += amount;
           weeklyIncomes[type] = (weeklyIncomes[type] ?? 0.0) + amount;
-        }
-      } else if (transaction['category'] == 'Expense') {
-        totalExpenses += amount;
-        if (date.isAfter(oneWeekAgo) && date.isBefore(now)) {
+        } else if (transaction['category'] == 'Expense') {
+          totalExpenses += amount;
           weeklyExpenses[type] = (weeklyExpenses[type] ?? 0.0) + amount;
+        }
+      } else if (date.isAfter(startOfLastWeek.subtract(Duration(days: 1))) && date.isBefore(startOfWeek)) {
+        if (transaction['category'] == 'Expense') {
+          lastWeekExpenses += amount;
+        } else if (transaction['category'] == 'Income') {
+          lastWeekIncome += amount;
         }
       }
     }
@@ -164,6 +188,12 @@ class StatisticsScreen extends StatelessWidget {
     double total = totalIncome + totalExpenses;
     double incomePercentage = total > 0 ? (totalIncome / total) * 100 : 0;
     double expensePercentage = total > 0 ? (totalExpenses / total) * 100 : 0;
+
+    // Calculate expense rate
+    double expenseRate = _calculateRate(totalExpenses, lastWeekExpenses);
+
+    // Calculate income rate
+    double incomeRate = _calculateRate(totalIncome, lastWeekIncome);
 
     return {
       'totalTransactions': totalTransactions,
@@ -173,7 +203,21 @@ class StatisticsScreen extends StatelessWidget {
       'expensePercentage': expensePercentage,
       'weeklyExpenses': weeklyExpenses,
       'weeklyIncomes': weeklyIncomes,
+      'expenseRate': expenseRate,
+      'incomeRate': incomeRate,
     };
+  }
+
+  double _calculateRate(double currentValue, double lastWeekValue) {
+    if (lastWeekValue != 0) {
+      if (currentValue > lastWeekValue) {
+        return ((currentValue - lastWeekValue) / lastWeekValue) * 100;
+      } else {
+        return -((lastWeekValue - currentValue) / lastWeekValue) * 100;
+      }
+    } else {
+      return currentValue > 0 ? 100 : 0;
+    }
   }
 
   Map<String, double> _convertToPercentages(Map<String, double> data) {
@@ -278,6 +322,41 @@ class IncomeExpenseProbabilityBar extends StatelessWidget {
                 ),
               ),
             ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class RateWidget extends StatelessWidget {
+  final double rate;
+  final bool isExpense;
+
+  const RateWidget({Key? key, required this.rate, required this.isExpense}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    Color color;
+    IconData icon;
+    
+    if (isExpense) {
+      color = rate > 0 ? Colors.green : Colors.red;
+      icon = rate > 0 ? Icons.arrow_upward : Icons.arrow_downward;
+    } else {
+      color = rate > 0 ? Colors.green : Colors.red;
+      icon = rate > 0 ? Icons.arrow_upward : Icons.arrow_downward;
+    }
+    
+    return Row(
+      children: [
+        Icon(icon, color: color, size: 16),
+        SizedBox(width: 4),
+        Text(
+          '${rate.abs().toStringAsFixed(1)}%',
+          style: TextStyle(
+            color: color,
+            fontWeight: FontWeight.bold,
           ),
         ),
       ],
