@@ -99,119 +99,128 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
         padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              TextFormField(
-                controller: _titleController,
-                decoration: InputDecoration(labelText: 'Title'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a title.';
-                  }
-                  return null;
-                },
-              ),
-              TextFormField(
-                controller: _amountController,
-                decoration: InputDecoration(labelText: 'Amount'),
-                keyboardType: TextInputType.number,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter an amount.';
-                  }
-                  if (double.tryParse(value) == null) {
-                    return 'Please enter a valid number.';
-                  }
-                  if (double.parse(value) <= 0) {
-                    return 'Please enter an amount greater than zero.';
-                  }
-                  return null;
-                },
-              ),
-              SizedBox(height: 20),
-              Text('Category'),
-              Row(
-                children: [
-                  Expanded(
-                    child: RadioListTile<String>(
-                      title: Text('Income'),
-                      value: 'Income',
-                      groupValue: _selectedCategory,
-                      onChanged: (value) {
-                        setState(() {
-                          _selectedCategory = value;
-                          _selectedType = null; // Reset type when category changes
-                        });
-                      },
-                    ),
-                  ),
-                  Expanded(
-                    child: RadioListTile<String>(
-                      title: Text('Expense'),
-                      value: 'Expense',
-                      groupValue: _selectedCategory,
-                      onChanged: (value) {
-                        setState(() {
-                          _selectedCategory = value;
-                          _selectedType = null; // Reset type when category changes
-                        });
-                      },
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 20),
-              if (_selectedCategory != null)
-                DropdownButtonFormField<String>(
-                  value: _selectedType,
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedType = value;
-                    });
-                  },
-                  items: _categoryTypes[_selectedCategory]!
-                      .map((type) => DropdownMenuItem<String>(
-                            value: type,
-                            child: Text(type),
-                          ))
-                      .toList(),
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                TextFormField(
+                  controller: _titleController,
                   decoration: InputDecoration(
-                    labelText: 'Type',
+                    labelText: 'Title',
                     border: OutlineInputBorder(),
                   ),
                   validator: (value) {
-                    if (value == null) {
-                      return 'Please select a type.';
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter a title.';
                     }
                     return null;
                   },
                 ),
-              SizedBox(height: 20),
-              Row(
-                children: <Widget>[
-                  Expanded(
-                    child: Text(
-                      _selectedDate == null
-                          ? 'No Date Chosen!'
-                          : 'Picked Date: ${_selectedDate!.toLocal().toString().split(' ')[0]}',
-                    ),
+                SizedBox(height: 16.0),
+                TextFormField(
+                  controller: _amountController,
+                  decoration: InputDecoration(
+                    labelText: 'Amount',
+                    border: OutlineInputBorder(),
                   ),
-                  TextButton(
-                    onPressed: _presentDatePicker,
-                    child: Text(
-                      'Choose Date',
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                  keyboardType: TextInputType.number,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter an amount.';
+                    }
+                    if (double.tryParse(value) == null) {
+                      return 'Please enter a valid number.';
+                    }
+                    if (double.parse(value) <= 0) {
+                      return 'Please enter an amount greater than zero.';
+                    }
+                    return null;
+                  },
+                ),
+                SizedBox(height: 20),
+                Text('Category'),
+                Row(
+                  children: [
+                    Expanded(
+                      child: RadioListTile<String>(
+                        title: Text('Income'),
+                        value: 'Income',
+                        groupValue: _selectedCategory,
+                        onChanged: (value) {
+                          setState(() {
+                            _selectedCategory = value;
+                            _selectedType = null;
+                          });
+                        },
+                      ),
                     ),
+                    Expanded(
+                      child: RadioListTile<String>(
+                        title: Text('Expense'),
+                        value: 'Expense',
+                        groupValue: _selectedCategory,
+                        onChanged: (value) {
+                          setState(() {
+                            _selectedCategory = value;
+                            _selectedType = null;
+                          });
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 20),
+                if (_selectedCategory != null)
+                  DropdownButtonFormField<String>(
+                    value: _selectedType,
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedType = value;
+                      });
+                    },
+                    items: _categoryTypes[_selectedCategory]!
+                        .map((type) => DropdownMenuItem<String>(
+                              value: type,
+                              child: Text(type),
+                            ))
+                        .toList(),
+                    decoration: InputDecoration(
+                      labelText: 'Type',
+                      border: OutlineInputBorder(),
+                    ),
+                    validator: (value) {
+                      if (value == null) {
+                        return 'Please select a type.';
+                      }
+                      return null;
+                    },
                   ),
-                ],
-              ),
-              SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _submitData,
-                child: Text(widget.transactionToEdit != null ? 'Update Transaction' : 'Add Transaction'),
-              ),
-            ],
+                SizedBox(height: 20),
+                Row(
+                  children: <Widget>[
+                    Expanded(
+                      child: Text(
+                        _selectedDate == null
+                            ? 'No Date Chosen!'
+                            : 'Picked Date: ${_selectedDate!.toLocal().toString().split(' ')[0]}',
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: _presentDatePicker,
+                      child: Text(
+                        'Choose Date',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: _submitData,
+                  child: Text(widget.transactionToEdit != null ? 'Update Transaction' : 'Add Transaction'),
+                ),
+              ],
+            ),
           ),
         ),
       ),
