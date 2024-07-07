@@ -15,6 +15,7 @@ dependencies:
   sqflite: ^2.1.1
   path: any
   http: ^0.13.3
+  fluttertoast: ^8.0.8
   path_provider: ^2.0.14
   connectivity: ^3.0.6
   syncfusion_flutter_charts: ^26.1.38
