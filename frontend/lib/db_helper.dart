@@ -121,7 +121,7 @@ class DBHelper {
     for (var transaction in unsyncedTransactions) {
       try {
         final response = await http.post(
-          Uri.parse('https://expense-tracker-livid-two.vercel.app/transactions/add'),
+          Uri.parse('https://penny-wise-flutter.vercel.app/transactions/add'),
           headers: <String, String>{
             'Content-Type': 'application/json; charset=UTF-8',
           },
