@@ -71,24 +71,27 @@ class PieChartPainter extends CustomPainter {
 
       canvas.drawArc(rect, startAngle, sweepAngle, true, paint);
 
-      final percentage = (entry.value * 100).toStringAsFixed(0) + '%';
-      final textPainter = TextPainter(
-        text: TextSpan(
-          text: percentage,
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
+      // Only draw percentage if it's not 0%
+      if (entry.value > 0) {
+        final percentage = (entry.value * 100).toStringAsFixed(0) + '%';
+        final textPainter = TextPainter(
+          text: TextSpan(
+            text: percentage,
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-        ),
-        textDirection: TextDirection.ltr,
-      );
-      textPainter.layout();
+          textDirection: TextDirection.ltr,
+        );
+        textPainter.layout();
 
-      final middleAngle = startAngle + sweepAngle / 2;
-      final textX = center.dx + (radius * 0.6) * cos(middleAngle) - textPainter.width / 2;
-      final textY = center.dy + (radius * 0.6) * sin(middleAngle) - textPainter.height / 2;
-      textPainter.paint(canvas, Offset(textX, textY));
+        final middleAngle = startAngle + sweepAngle / 2;
+        final textX = center.dx + (radius * 0.6) * cos(middleAngle) - textPainter.width / 2;
+        final textY = center.dy + (radius * 0.6) * sin(middleAngle) - textPainter.height / 2;
+        textPainter.paint(canvas, Offset(textX, textY));
+      }
 
       startAngle += sweepAngle;
     });

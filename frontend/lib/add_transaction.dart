@@ -19,6 +19,11 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
   String? _selectedType;
   String? _selectedCategory;
 
+  final Map<String, List<String>> _categoryTypes = {
+    'Income': ['Salary', 'Revenue', 'Other'],
+    'Expense': ['Grocery', 'Financial', 'Administrative', 'Entertainment', 'Other'],
+  };
+
   @override
   void initState() {
     super.initState();
@@ -51,17 +56,14 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
 
       try {
         if (widget.transactionToEdit != null) {
-          // Update existing transaction
           await DBHelper().updateTransaction(widget.transactionToEdit!['id'], transaction);
           print('Transaction updated successfully.');
         } else {
-          // Insert new transaction
           await DBHelper().insertTransaction(transaction);
           print('Transaction inserted successfully.');
         }
 
         widget.onAddTransaction();
-
         Navigator.of(context).pop();
       } catch (error) {
         print('Error saving transaction: $error');
@@ -128,31 +130,6 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                 },
               ),
               SizedBox(height: 20),
-              DropdownButtonFormField<String>(
-                value: _selectedType,
-                onChanged: (value) {
-                  setState(() {
-                    _selectedType = value;
-                  });
-                },
-                items: ['Grocery', 'Entertainment', 'Other']
-                    .map((type) => DropdownMenuItem<String>(
-                          value: type,
-                          child: Text(type),
-                        ))
-                    .toList(),
-                decoration: InputDecoration(
-                  labelText: 'Type',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) {
-                  if (value == null) {
-                    return 'Please select a type.';
-                  }
-                  return null;
-                },
-              ),
-              SizedBox(height: 20),
               Text('Category'),
               Row(
                 children: [
@@ -164,6 +141,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                       onChanged: (value) {
                         setState(() {
                           _selectedCategory = value;
+                          _selectedType = null; // Reset type when category changes
                         });
                       },
                     ),
@@ -176,12 +154,39 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                       onChanged: (value) {
                         setState(() {
                           _selectedCategory = value;
+                          _selectedType = null; // Reset type when category changes
                         });
                       },
                     ),
                   ),
                 ],
               ),
+              SizedBox(height: 20),
+              if (_selectedCategory != null)
+                DropdownButtonFormField<String>(
+                  value: _selectedType,
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedType = value;
+                    });
+                  },
+                  items: _categoryTypes[_selectedCategory]!
+                      .map((type) => DropdownMenuItem<String>(
+                            value: type,
+                            child: Text(type),
+                          ))
+                      .toList(),
+                  decoration: InputDecoration(
+                    labelText: 'Type',
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (value) {
+                    if (value == null) {
+                      return 'Please select a type.';
+                    }
+                    return null;
+                  },
+                ),
               SizedBox(height: 20),
               Row(
                 children: <Widget>[

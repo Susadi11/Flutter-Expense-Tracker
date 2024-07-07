@@ -7,6 +7,8 @@ class StatisticsScreen extends StatelessWidget {
     Color.fromARGB(255, 244, 67, 54),
     Colors.orange,
     Colors.yellow,
+    Color.fromARGB(255, 37, 96, 145),
+    Colors.brown,
   ];
 
   final List<Color> incomeColors = [
@@ -76,47 +78,43 @@ class StatisticsScreen extends StatelessWidget {
                       expensePercentage: stats['expensePercentage'],
                     ),
                     SizedBox(height: 40),
-                    if (stats['weeklyExpenses'].isNotEmpty) ...[
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Weekly Expenses',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Weekly Expenses',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
                           ),
-                          RateWidget(rate: stats['expenseRate'], isExpense: true),
-                        ],
-                      ),
-                      SizedBox(height: 20),
-                      PieChart(
-                        data: _convertToPercentages(stats['weeklyExpenses']),
-                        colors: expenseColors,
-                      ),
-                      SizedBox(height: 40),
-                    ],
-                    if (stats['weeklyIncomes'].isNotEmpty) ...[
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Weekly Incomes',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
+                        ),
+                        RateWidget(rate: stats['expenseRate'], isExpense: true),
+                      ],
+                    ),
+                    SizedBox(height: 20),
+                    PieChart(
+                      data: _convertToPercentages(stats['weeklyExpenses']),
+                      colors: expenseColors,
+                    ),
+                    SizedBox(height: 40),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Weekly Incomes',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
                           ),
-                          RateWidget(rate: stats['incomeRate'], isExpense: false),
-                        ],
-                      ),
-                      SizedBox(height: 20),
-                      PieChart(
-                        data: _convertToPercentages(stats['weeklyIncomes']),
-                        colors: incomeColors,
-                      ),
-                    ],
+                        ),
+                        RateWidget(rate: stats['incomeRate'], isExpense: false),
+                      ],
+                    ),
+                    SizedBox(height: 20),
+                    PieChart(
+                      data: _convertToPercentages(stats['weeklyIncomes']),
+                      colors: incomeColors,
+                    ),
                   ],
                 ),
               );
@@ -137,8 +135,16 @@ class StatisticsScreen extends StatelessWidget {
         'totalExpenses': 0.0,
         'incomePercentage': 0.0,
         'expensePercentage': 0.0,
-        'weeklyExpenses': {},
-        'weeklyIncomes': {},
+        'weeklyExpenses': {
+          'Grocery': 0.0,
+          'Entertainment': 0.0,
+          'Other': 0.0,
+        },
+        'weeklyIncomes': {
+          'Salary': 0.0,
+          'Loan': 0.0,
+          'Other': 0.0,
+        },
         'expenseRate': 0.0,
         'incomeRate': 0.0,
       };
@@ -151,10 +157,16 @@ class StatisticsScreen extends StatelessWidget {
     double lastWeekIncome = 0.0;
     Map<String, double> weeklyExpenses = {
       'Grocery': 0.0,
+      'Financial': 0.0,
+      'Administrative': 0.0,
       'Entertainment': 0.0,
       'Other': 0.0,
     };
-    Map<String, double> weeklyIncomes = {};
+    Map<String, double> weeklyIncomes = {
+      'Salary': 0.0,
+      'Loan': 0.0,
+      'Other': 0.0,
+    };
 
     final now = DateTime.now();
     final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
@@ -185,7 +197,7 @@ class StatisticsScreen extends StatelessWidget {
       }
     }
 
-    double total = totalIncome + totalExpenses;
+     double total = totalIncome + totalExpenses;
     double incomePercentage = total > 0 ? (totalIncome / total) * 100 : 0;
     double expensePercentage = total > 0 ? (totalExpenses / total) * 100 : 0;
 
@@ -223,7 +235,7 @@ class StatisticsScreen extends StatelessWidget {
   Map<String, double> _convertToPercentages(Map<String, double> data) {
     double total = data.values.fold(0, (a, b) => a + b);
     if (total == 0) {
-      return {}; // Return an empty map if there's no data
+      return data; // Return the original map with 0 values if there's no data
     }
     return data.map((key, value) => MapEntry(key, value / total));
   }
