@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'theme_notifier.dart';
+import 'login.dart'; // Ensure this import statement is added
 
 class SettingsScreen extends StatelessWidget {
   @override
@@ -10,26 +11,30 @@ class SettingsScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Settings'),
+        title: const Text('Settings'),
       ),
       body: ListView(
         children: [
           ListTile(
-            title: Text('Account Settings'),
-            trailing: Icon(Icons.arrow_forward_ios),
+            title: const Text('Account Settings'),
+            trailing: const Icon(Icons.arrow_forward_ios),
             onTap: () {
-              // Add navigation to account settings screen
+              // Navigate to Login screen
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const Login()),
+              );
             },
           ),
           SwitchListTile(
-            title: Text('Dark Mode'),
+            title: const Text('Dark Mode'),
             value: themeNotifier.isDarkTheme,
             onChanged: (value) {
               themeNotifier.toggleTheme(); // Use instance method toggleTheme
             },
           ),
           /*SwitchListTile(
-            title: Text('Enable Notifications'),
+            title: const Text('Enable Notifications'),
             value: themeNotifier.notificationsEnabled,
             onChanged: (value) {
               themeNotifier.toggleNotifications(value); // Use instance method toggleNotifications
