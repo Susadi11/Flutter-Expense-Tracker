@@ -60,7 +60,6 @@ class DBHelper {
     int id = await db.insert('transactions', transaction);
     Fluttertoast.showToast(msg: 'Transaction inserted with id: $id');
 
-    // Call sendDataToMongoDB after inserting the transaction
     await sendDataToMongoDB();
 
     return id;
@@ -68,9 +67,43 @@ class DBHelper {
 
   Future<List<Map<String, dynamic>>> getTransactions() async {
     final db = await database;
-    List<Map<String, dynamic>> transactions = await db.query('transactions');
-    Fluttertoast.showToast(msg: 'Fetched ${transactions.length} transactions');
-    return transactions;
+    List<Map<String, dynamic>> localTransactions = await db.query('transactions');
+    
+    // Fetch transactions from MongoDB
+    List<Map<String, dynamic>> mongoTransactions = await getTransactionsFromMongoDB();
+    
+    // Combine local and MongoDB transactions
+    Set<int> localIds = Set.from(localTransactions.map((t) => t['id']));
+    List<Map<String, dynamic>> allTransactions = [
+      ...localTransactions,
+      ...mongoTransactions.where((t) => !localIds.contains(t['id']))
+    ];
+
+    Fluttertoast.showToast(msg: 'Fetched ${allTransactions.length} transactions');
+    return allTransactions;
+  }
+
+  Future<List<Map<String, dynamic>>> getTransactionsFromMongoDB() async {
+    try {
+      final response = await http.get(
+        Uri.parse('https://penny-wise-flutter.vercel.app/transactions'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        List<dynamic> jsonResponse = jsonDecode(response.body);
+        return jsonResponse.cast<Map<String, dynamic>>();
+      } else {
+        print('Failed to fetch transactions from MongoDB: ${response.statusCode}');
+        print('Response body: ${response.body}');
+        return [];
+      }
+    } catch (e) {
+      print('Error fetching transactions from MongoDB: $e');
+      return [];
+    }
   }
 
   Future<List<Map<String, dynamic>>> getUnsyncedTransactions() async {
@@ -80,11 +113,50 @@ class DBHelper {
     return transactions;
   }
 
-  Future<int> deleteTransaction(int id) async {
+  Future<bool> deleteTransaction(int id) async {
     final db = await database;
     int count = await db.delete('transactions', where: 'id = ?', whereArgs: [id]);
-    Fluttertoast.showToast(msg: 'Deleted $count transaction(s) with id: $id');
-    return count;
+    
+    if (count > 0) {
+      Fluttertoast.showToast(msg: 'Deleted transaction with id: $id from SQLite');
+      
+      // Delete from MongoDB
+      bool deletedFromMongo = await deleteTransactionFromMongoDB(id);
+      
+      if (deletedFromMongo) {
+        Fluttertoast.showToast(msg: 'Deleted transaction with id: $id from MongoDB');
+        return true;
+      } else {
+        Fluttertoast.showToast(msg: 'Failed to delete transaction with id: $id from MongoDB');
+        return false;
+      }
+    } else {
+      Fluttertoast.showToast(msg: 'Transaction with id: $id not found in SQLite');
+      return false;
+    }
+  }
+
+  Future<bool> deleteTransactionFromMongoDB(int id) async {
+    try {
+      final response = await http.delete(
+        Uri.parse('https://penny-wise-flutter.vercel.app/transactions/delete/$id'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        print('Transaction deleted from MongoDB with id: $id');
+        return true;
+      } else {
+        print('Failed to delete transaction from MongoDB: ${response.statusCode}');
+        print('Response body: ${response.body}');
+        return false;
+      }
+    } catch (e) {
+      print('Error deleting transaction from MongoDB: $e');
+      return false;
+    }
   }
 
   Future<int> updateTransaction(int id, Map<String, dynamic> transaction) async {
@@ -98,7 +170,6 @@ class DBHelper {
     );
     Fluttertoast.showToast(msg: 'Updated $count transaction(s) with id: $id');
 
-    // Call sendDataToMongoDB after updating the transaction
     await sendDataToMongoDB();
 
     return count;

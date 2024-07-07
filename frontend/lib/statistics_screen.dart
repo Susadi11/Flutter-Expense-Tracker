@@ -174,7 +174,7 @@ class StatisticsScreen extends StatelessWidget {
     final startOfLastWeek = startOfWeek.subtract(Duration(days: 7));
 
     for (var transaction in transactions) {
-      final amount = transaction['amount'] as double;
+      final amount = transaction['amount'].toDouble();
       final date = DateTime.parse(transaction['date']);
       final type = transaction['type'] as String;
 
