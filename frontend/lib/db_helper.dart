@@ -139,7 +139,7 @@ class DBHelper {
   Future<bool> deleteTransactionFromMongoDB(int id) async {
     try {
       final response = await http.delete(
-        Uri.parse('https://penny-wise-flutter.vercel.app/transactions/delete/$id'),
+        Uri.parse('https://penny-wise-flutter.vercel.app/transactions/$id'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
