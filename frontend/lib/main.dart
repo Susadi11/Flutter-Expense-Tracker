@@ -6,7 +6,9 @@ import 'add_transaction.dart';
 import 'home_screen.dart';
 import 'statistics_screen.dart';
 import 'settings_screen.dart';
+import 'profile.dart'; // Ensure this import is correct
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -50,12 +52,21 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
+  String username = "Username"; // Example value, replace with actual data
+  String email = "email@example.com"; // Example value, replace with actual data
 
-  final List<Widget> _widgetOptions = <Widget>[
-    HomeScreen(),
-    StatisticsScreen(),
-    SettingsScreen(),
-  ];
+  final List<Widget> _widgetOptions = [];
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize the widget options list with the username and email
+    _widgetOptions.addAll([
+      HomeScreen(),
+      StatisticsScreen(),
+      Profile(username: username, email: email),
+    ]);
+  }
 
   void _onItemTapped(int index) {
     setState(() {
