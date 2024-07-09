@@ -6,9 +6,11 @@ import 'add_transaction.dart';
 import 'home_screen.dart';
 import 'statistics_screen.dart';
 import 'settings_screen.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(); // Initialize Firebase
   await Hive.initFlutter(); // Initialize Hive
   await Hive.openBox('login'); // Open 'login' box
   await Hive.openBox('accounts'); // Open 'accounts' box

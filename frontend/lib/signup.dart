@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:expense_tracker/user_auth/firebase_auth_implementation/firebase_auth_services.dart';
+import 'package:expense_tracker/toast.dart';
+import 'home_screen.dart';
 
 class Signup extends StatefulWidget {
   const Signup({super.key});
@@ -22,6 +26,9 @@ class _SignupState extends State<Signup> {
 
   final Box _boxAccounts = Hive.box("accounts");
   bool _obscurePassword = true;
+  bool isSigningUp = false;
+
+  final FirebaseAuthService _auth = FirebaseAuthService();
 
   @override
   Widget build(BuildContext context) {
@@ -63,7 +70,6 @@ class _SignupState extends State<Signup> {
                   } else if (_boxAccounts.containsKey(value)) {
                     return "Username is already registered.";
                   }
-
                   return null;
                 },
                 onEditingComplete: () => _focusNodeEmail.requestFocus(),
@@ -174,31 +180,11 @@ class _SignupState extends State<Signup> {
                       ),
                     ),
                     onPressed: () {
-                      if (_formKey.currentState?.validate() ?? false) {
-                        _boxAccounts.put(
-                          _controllerUsername.text,
-                          _controllerConFirmPassword.text,
-                        );
-
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            width: 200,
-                            backgroundColor:
-                                Theme.of(context).colorScheme.secondary,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            behavior: SnackBarBehavior.floating,
-                            content: const Text("Registered Successfully"),
-                          ),
-                        );
-
-                        _formKey.currentState?.reset();
-
-                        Navigator.pop(context);
-                      }
+                      _signUp();
                     },
-                    child: const Text("Register"),
+                    child: isSigningUp
+                        ? CircularProgressIndicator(color: Colors.white)
+                        : const Text("Register"),
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -218,6 +204,38 @@ class _SignupState extends State<Signup> {
       ),
     );
   }
+
+  void _signUp() async {
+  if (_formKey.currentState?.validate() ?? false) {
+    setState(() {
+      isSigningUp = true;
+    });
+
+    String username = _controllerUsername.text;
+    String email = _controllerEmail.text;
+    String password = _controllerPassword.text;
+
+    User? user = await _auth.signUpWithEmailAndPassword(email, password);
+
+    setState(() {
+      isSigningUp = false;
+    });
+
+    if (user != null) {
+      _boxAccounts.put(username, password);
+
+      showToast(message: "User is successfully created");
+      
+      // Replace the current route with the home screen
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => HomeScreen()),
+      );
+    } else {
+      showToast(message: "Some error happened");
+    }
+  }
+}
 
   @override
   void dispose() {
