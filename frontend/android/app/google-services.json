@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "471151829832",
+    "project_id": "pennywise-d3eae",
+    "storage_bucket": "pennywise-d3eae.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:471151829832:android:2ba4d8c3110ef63b63c97d",
+        "android_client_info": {
+          "package_name": "com.randil.pennywise"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDk-6iEL1RdEhwHfqJHfdE7cFgkUGkdTPk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
