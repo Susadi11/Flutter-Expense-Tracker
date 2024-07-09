@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'login.dart';
-import 'settings_screen.dart';  // Make sure to import your settings.dart file
+import 'settings_screen.dart';
 
 class Profile extends StatelessWidget {
   final String username;
   final String email;
 
-  const Profile({super.key, required this.username, required this.email});
+  const Profile({
+    Key? key,
+    required this.username,
+    required this.email,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +24,7 @@ class Profile extends StatelessWidget {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) =>  SettingsScreen()),
+                MaterialPageRoute(builder: (context) => SettingsScreen()),
               );
             },
           ),
@@ -87,32 +91,6 @@ class Profile extends StatelessWidget {
   }
 }
 
-  Widget _singleItem(BuildContext context, ProfileInfoItem item) => Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Text(
-              item.value.toString(),
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 20,
-              ),
-            ),
-          ),
-          Text(
-            item.title,
-            style: Theme.of(context).textTheme.bodySmall,
-          )
-        ],
-      );
-
-class ProfileInfoItem {
-  final String title;
-  final int value;
-  const ProfileInfoItem(this.title, this.value);
-}
-
 class _TopPortion extends StatelessWidget {
   const _TopPortion({Key? key}) : super(key: key);
 
@@ -124,7 +102,14 @@ class _TopPortion extends StatelessWidget {
         Container(
           margin: const EdgeInsets.only(bottom: 50),
           decoration: const BoxDecoration(
+            color: Colors.black,
+            image: DecorationImage(
+              fit: BoxFit.cover,
+              image: NetworkImage(
+                'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80',
               ),
+            ),
+          ),
         ),
         Align(
           alignment: Alignment.bottomCenter,
@@ -136,12 +121,13 @@ class _TopPortion extends StatelessWidget {
               children: [
                 Container(
                   decoration: const BoxDecoration(
-                    color: Colors.black,
                     shape: BoxShape.circle,
                     image: DecorationImage(
-                        fit: BoxFit.cover,
-                        image: NetworkImage(
-                            'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQMrYE5dTA2hr1JGLuYZQv_L218986OZ0ogjDPSdIolTV1_pmLVtDRjd1gcTu4cJ9b2CV8&usqp=CAU')),
+                      fit: BoxFit.cover,
+                      image: NetworkImage(
+                        'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80',
+                      ),
+                    ),
                   ),
                 ),
                 Positioned(
@@ -153,7 +139,9 @@ class _TopPortion extends StatelessWidget {
                     child: Container(
                       margin: const EdgeInsets.all(8.0),
                       decoration: const BoxDecoration(
-                          color: Colors.green, shape: BoxShape.circle),
+                        color: Colors.green,
+                        shape: BoxShape.circle,
+                      ),
                     ),
                   ),
                 ),

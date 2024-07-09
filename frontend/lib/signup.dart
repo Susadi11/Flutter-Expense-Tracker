@@ -222,6 +222,9 @@ class _SignupState extends State<Signup> {
     });
 
     if (user != null) {
+      // Store the username in Firebase
+      await user.updateDisplayName(username);
+      
       _boxAccounts.put(username, password);
 
       showToast(message: "User is successfully created");

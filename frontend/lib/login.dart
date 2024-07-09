@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart'; // Import for Google icon
-
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:expense_tracker/user_auth/firebase_auth_implementation/firebase_auth_services.dart';
+import 'toast.dart';
 import 'signup.dart';
-import 'home_screen.dart';
+import 'profile.dart';
 
 class Login extends StatefulWidget {
   const Login({Key? key}) : super(key: key);
@@ -16,19 +18,17 @@ class _LoginState extends State<Login> {
   final GlobalKey<FormState> _formKey = GlobalKey();
 
   final FocusNode _focusNodePassword = FocusNode();
-  final TextEditingController _controllerUsername = TextEditingController();
+  final TextEditingController _controllerEmail = TextEditingController();
   final TextEditingController _controllerPassword = TextEditingController();
 
   bool _obscurePassword = true;
   final Box _boxLogin = Hive.box("login");
-  final Box _boxAccounts = Hive.box("accounts");
+
+  final FirebaseAuthService _auth = FirebaseAuthService();
+  bool isLoggingIn = false;
 
   @override
   Widget build(BuildContext context) {
-    if (_boxLogin.get("loginStatus") ?? false) {
-      return HomeScreen();
-    }
-
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.primaryContainer,
       body: Form(
@@ -49,11 +49,11 @@ class _LoginState extends State<Login> {
               ),
               const SizedBox(height: 60),
               TextFormField(
-                controller: _controllerUsername,
-                keyboardType: TextInputType.name,
+                controller: _controllerEmail,
+                keyboardType: TextInputType.emailAddress,
                 decoration: InputDecoration(
-                  labelText: "Username",
-                  prefixIcon: const Icon(Icons.person_outline),
+                  labelText: "Email",
+                   prefixIcon: Icon(Icons.email_outlined),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
@@ -64,11 +64,10 @@ class _LoginState extends State<Login> {
                 onEditingComplete: () => _focusNodePassword.requestFocus(),
                 validator: (String? value) {
                   if (value == null || value.isEmpty) {
-                    return "Please enter username.";
-                  } else if (!_boxAccounts.containsKey(value)) {
-                    return "Username is not registered.";
+                    return "Please enter email.";
+                  } else if (!value.contains('@') || !value.contains('.')) {
+                    return "Please enter a valid email.";
                   }
-
                   return null;
                 },
               ),
@@ -101,11 +100,7 @@ class _LoginState extends State<Login> {
                 validator: (String? value) {
                   if (value == null || value.isEmpty) {
                     return "Please enter password.";
-                  } else if (value !=
-                      _boxAccounts.get(_controllerUsername.text)) {
-                    return "Wrong password.";
                   }
-
                   return null;
                 },
               ),
@@ -120,21 +115,11 @@ class _LoginState extends State<Login> {
                       ),
                     ),
                     onPressed: () {
-                      if (_formKey.currentState?.validate() ?? false) {
-                        _boxLogin.put("loginStatus", true);
-                        _boxLogin.put("userName", _controllerUsername.text);
-
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) {
-                              return HomeScreen();
-                            },
-                          ),
-                        );
-                      }
+                      _login();
                     },
-                    child: const Text("Login"),
+                    child: isLoggingIn
+                        ? CircularProgressIndicator(color: Colors.white)
+                        : const Text("Login"),
                   ),
                   const SizedBox(height: 20),
                   ElevatedButton.icon(
@@ -163,7 +148,6 @@ class _LoginState extends State<Login> {
                       TextButton(
                         onPressed: () {
                           _formKey.currentState?.reset();
-
                           Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -186,10 +170,44 @@ class _LoginState extends State<Login> {
     );
   }
 
+  void _login() async {
+    if (_formKey.currentState?.validate() ?? false) {
+      setState(() {
+        isLoggingIn = true;
+      });
+
+      String email = _controllerEmail.text;
+      String password = _controllerPassword.text;
+
+      User? user = await _auth.signInWithEmailAndPassword(email, password);
+
+      setState(() {
+        isLoggingIn = false;
+      });
+
+      if (user != null) {
+        _boxLogin.put("loginStatus", true);
+        _boxLogin.put("userEmail", user.email);
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => Profile(
+              username: user.displayName ?? 'User',
+              email: user.email ?? 'email@example.com',
+            ),
+          ),
+        );
+      } else {
+        // The toast message will be shown by the FirebaseAuthService
+      }
+    }
+  }
+
   @override
   void dispose() {
     _focusNodePassword.dispose();
-    _controllerUsername.dispose();
+    _controllerEmail.dispose();
     _controllerPassword.dispose();
     super.dispose();
   }
