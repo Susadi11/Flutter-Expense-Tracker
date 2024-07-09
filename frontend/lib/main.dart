@@ -29,7 +29,7 @@ class FinanceTrackerApp extends StatelessWidget {
     return Consumer<ThemeNotifier>(
       builder: (context, themeNotifier, _) {
         return MaterialApp(
-          title: 'Finance Tracker',
+          title: 'PennyWise',
           theme: ThemeData(
             primarySwatch: Colors.red,
             brightness: themeNotifier.isDarkTheme
@@ -66,9 +66,6 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Finance Tracker'),
-      ),
       body: _widgetOptions.elementAt(_selectedIndex),
       bottomNavigationBar: NavigationBar(
         animationDuration: const Duration(seconds: 1),
@@ -86,9 +83,9 @@ class _HomePageState extends State<HomePage> {
             label: 'Statistics',
           ),
           NavigationDestination(
-            icon: Icon(Icons.settings_outlined),
-            selectedIcon: Icon(Icons.settings_rounded),
-            label: 'Settings',
+            icon: Icon(Icons.person_outline),
+            selectedIcon: Icon(Icons.person),
+            label: 'Profile',
           ),
         ],
       ),
