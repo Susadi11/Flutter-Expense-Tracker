@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'theme_notifier.dart';
+import 'theme_notifier.dart'; // Import your ThemeNotifier class
 import 'add_transaction.dart';
 import 'home_screen.dart';
 import 'statistics_screen.dart';
@@ -10,36 +10,20 @@ import 'package:firebase_core/firebase_core.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
-  await Hive.initFlutter();
-  await Hive.openBox('login');
-  await Hive.openBox('accounts');
-
-  // Example values (replace with actual username and email retrieval logic)
-  String username = 'JohnDoe';
-  String email = 'johndoe@example.com';
+  await Firebase.initializeApp(); // Initialize Firebase
+  await Hive.initFlutter(); // Initialize Hive
+  await Hive.openBox('login'); // Open 'login' box
+  await Hive.openBox('accounts'); // Open 'accounts' box
 
   runApp(
     ChangeNotifierProvider(
-      create: (_) => ThemeNotifier(),
-      child: FinanceTrackerApp(
-        username: username,
-        email: email,
-      ),
+      create: (_) => ThemeNotifier(), // Create an instance of ThemeNotifier
+      child: FinanceTrackerApp(),
     ),
   );
 }
 
 class FinanceTrackerApp extends StatelessWidget {
-  final String username;
-  final String email;
-
-  const FinanceTrackerApp({
-    Key? key,
-    required this.username,
-    required this.email,
-  }) : super(key: key);
-
   @override
   Widget build(BuildContext context) {
     return Consumer<ThemeNotifier>(
@@ -50,9 +34,9 @@ class FinanceTrackerApp extends StatelessWidget {
             primarySwatch: Colors.red,
             brightness: themeNotifier.isDarkTheme
                 ? Brightness.dark
-                : Brightness.light,
+                : Brightness.light, // Use the theme from ThemeNotifier
           ),
-          home: HomePage(username: username, email: email),
+          home: HomePage(),
         );
       },
     );
@@ -60,15 +44,6 @@ class FinanceTrackerApp extends StatelessWidget {
 }
 
 class HomePage extends StatefulWidget {
-  final String username;
-  final String email;
-
-  const HomePage({
-    Key? key,
-    required this.username,
-    required this.email,
-  }) : super(key: key);
-
   @override
   _HomePageState createState() => _HomePageState();
 }
@@ -76,17 +51,11 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
 
-  late final List<Widget> _widgetOptions;
-
-  @override
-  void initState() {
-    super.initState();
-    _widgetOptions = <Widget>[
-      HomeScreen(),
-      StatisticsScreen(),
-      SettingsScreen(username: widget.username, email: widget.email),
-    ];
-  }
+  final List<Widget> _widgetOptions = <Widget>[
+    HomeScreen(),
+    StatisticsScreen(),
+    SettingsScreen(),
+  ];
 
   void _onItemTapped(int index) {
     setState(() {
@@ -98,7 +67,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Finance Tracker'),
+        title: Text('Finance Tracker'),
       ),
       body: _widgetOptions.elementAt(_selectedIndex),
       bottomNavigationBar: NavigationBar(
@@ -133,7 +102,7 @@ class _HomePageState extends State<HomePage> {
             ),
           );
         },
-        child: const Icon(Icons.add),
+        child: Icon(Icons.add),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );

@@ -3,7 +3,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:expense_tracker/user_auth/firebase_auth_implementation/firebase_auth_services.dart';
 import 'package:expense_tracker/toast.dart';
-import 'profile.dart';
+import 'home_screen.dart';
 
 class Signup extends StatefulWidget {
   const Signup({super.key});
@@ -205,7 +205,7 @@ class _SignupState extends State<Signup> {
     );
   }
 
- void _signUp() async {
+  void _signUp() async {
   if (_formKey.currentState?.validate() ?? false) {
     setState(() {
       isSigningUp = true;
@@ -226,17 +226,16 @@ class _SignupState extends State<Signup> {
 
       showToast(message: "User is successfully created");
       
-      // Navigate to Profile page with user details
+      // Replace the current route with the home screen
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => Profile(username: username, email: email)),
+        MaterialPageRoute(builder: (context) => HomeScreen()),
       );
     } else {
       showToast(message: "Some error happened");
     }
   }
 }
-
 
   @override
   void dispose() {
