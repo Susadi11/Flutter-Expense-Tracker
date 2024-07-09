@@ -1,12 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'theme_notifier.dart';
-import 'login.dart'; // Ensure this import statement is added
+import 'theme_notifier.dart'; // Import your ThemeNotifier class
+import 'login.dart'; // Ensure Login screen is imported
+import 'profile.dart'; // Ensure Profile screen is imported
 
 class SettingsScreen extends StatelessWidget {
+  final String username;
+  final String email;
+
+  const SettingsScreen({
+    Key? key,
+    required this.username,
+    required this.email,
+  }) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
-    // Create an instance of ThemeNotifier using Provider.of
     final themeNotifier = Provider.of<ThemeNotifier>(context);
 
     return Scaffold(
@@ -19,7 +28,6 @@ class SettingsScreen extends StatelessWidget {
             title: const Text('Account Settings'),
             trailing: const Icon(Icons.arrow_forward_ios),
             onTap: () {
-              // Navigate to Login screen
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const Login()),
@@ -30,16 +38,19 @@ class SettingsScreen extends StatelessWidget {
             title: const Text('Dark Mode'),
             value: themeNotifier.isDarkTheme,
             onChanged: (value) {
-              themeNotifier.toggleTheme(); // Use instance method toggleTheme
+              themeNotifier.toggleTheme();
             },
           ),
-          /*SwitchListTile(
-            title: const Text('Enable Notifications'),
-            value: themeNotifier.notificationsEnabled,
-            onChanged: (value) {
-              themeNotifier.toggleNotifications(value); // Use instance method toggleNotifications
+          ListTile(
+            title: const Text('My Profile'),
+            trailing: const Icon(Icons.arrow_forward_ios),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => Profile(username: username, email: email)),
+              );
             },
-          ),*/
+          ),
         ],
       ),
     );
