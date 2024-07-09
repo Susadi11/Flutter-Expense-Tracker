@@ -20,7 +20,7 @@ dependencies:
   http: ^0.13.3
   fluttertoast: ^8.0.8
   path_provider: ^2.0.14
-  connectivity: ^3.0.6
+  connectivity_plus: ^6.0.3
   syncfusion_flutter_charts: ^26.1.38
   firebase_auth: ^5.1.1
   firebase_core: ^3.1.1

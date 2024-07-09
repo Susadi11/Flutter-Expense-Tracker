@@ -4,6 +4,7 @@ import 'dart:async';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 
 class DBHelper {
   static final DBHelper _instance = DBHelper._internal();
@@ -22,7 +23,7 @@ class DBHelper {
     String path = join(await getDatabasesPath(), 'transactions.db');
     return await openDatabase(
       path,
-      version: 4,
+      version: 2,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
@@ -37,53 +38,84 @@ class DBHelper {
         date TEXT,
         type TEXT,
         category TEXT,
-        synced INTEGER DEFAULT 0
+        synced INTEGER DEFAULT 0,
+        mongoId TEXT
       )
     ''');
   }
 
   Future _onUpgrade(Database db, int oldVersion, int newVersion) async {
     if (oldVersion < 2) {
-      await db.execute('ALTER TABLE transactions ADD COLUMN type TEXT');
+      await db.execute('ALTER TABLE transactions ADD COLUMN mongoId TEXT');
     }
-    if (oldVersion < 3) {
-      await db.execute('ALTER TABLE transactions ADD COLUMN category TEXT');
-    }
-    if (oldVersion < 4) {
-      await db.execute('ALTER TABLE transactions ADD COLUMN synced INTEGER DEFAULT 0');
-    }
+  }
+
+  Future<bool> isConnected() async {
+    var connectivityResult = await (Connectivity().checkConnectivity());
+    return connectivityResult != ConnectivityResult.none;
   }
 
   Future<int> insertTransaction(Map<String, dynamic> transaction) async {
     final db = await database;
     transaction['synced'] = 0;
     int id = await db.insert('transactions', transaction);
-    Fluttertoast.showToast(msg: 'Transaction inserted with id: $id');
+    Fluttertoast.showToast(msg: 'Transaction inserted locally with id: $id');
 
-    await sendDataToMongoDB();
+    if (await isConnected()) {
+      await sendTransactionToMongoDB(transaction, id);
+    }
 
     return id;
+  }
+
+  Future<void> sendTransactionToMongoDB(Map<String, dynamic> transaction, int localId) async {
+    try {
+      final response = await http.post(
+        Uri.parse('https://penny-wise-flutter.vercel.app/transactions/add'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(transaction),
+      );
+
+      if (response.statusCode == 201) {
+        Map<String, dynamic> responseBody = jsonDecode(response.body);
+        String mongoId = responseBody['_id'];
+        await updateMongoId(localId, mongoId);
+        await markTransactionAsSynced(localId);
+        Fluttertoast.showToast(msg: 'Transaction synced with MongoDB');
+      } else {
+        Fluttertoast.showToast(msg: 'Failed to sync transaction with MongoDB');
+      }
+    } catch (e) {
+      Fluttertoast.showToast(msg: 'Error syncing transaction with MongoDB: $e');
+    }
+  }
+
+  Future<void> updateMongoId(int localId, String mongoId) async {
+    final db = await database;
+    await db.update(
+      'transactions',
+      {'mongoId': mongoId},
+      where: 'id = ?',
+      whereArgs: [localId],
+    );
   }
 
   Future<List<Map<String, dynamic>>> getTransactions() async {
     final db = await database;
     List<Map<String, dynamic>> localTransactions = await db.query('transactions');
-    
-    // Fetch transactions from MongoDB
-    List<Map<String, dynamic>> mongoTransactions = await getTransactionsFromMongoDB();
-    
-    // Combine local and MongoDB transactions
-    Set<int> localIds = Set.from(localTransactions.map((t) => t['id']));
-    List<Map<String, dynamic>> allTransactions = [
-      ...localTransactions,
-      ...mongoTransactions.where((t) => !localIds.contains(t['id']))
-    ];
 
-    Fluttertoast.showToast(msg: 'Fetched ${allTransactions.length} transactions');
-    return allTransactions;
+    if (await isConnected()) {
+      await syncWithMongoDB();
+      localTransactions = await db.query('transactions');
+    }
+
+    Fluttertoast.showToast(msg: 'Fetched ${localTransactions.length} transactions');
+    return localTransactions;
   }
 
-  Future<List<Map<String, dynamic>>> getTransactionsFromMongoDB() async {
+  Future<void> syncWithMongoDB() async {
     try {
       final response = await http.get(
         Uri.parse('https://penny-wise-flutter.vercel.app/transactions'),
@@ -93,69 +125,103 @@ class DBHelper {
       );
 
       if (response.statusCode == 200) {
-        List<dynamic> jsonResponse = jsonDecode(response.body);
-        return jsonResponse.cast<Map<String, dynamic>>();
+        List<dynamic> mongoTransactions = jsonDecode(response.body);
+        await _updateLocalDatabase(mongoTransactions);
       } else {
-        print('Failed to fetch transactions from MongoDB: ${response.statusCode}');
-        print('Response body: ${response.body}');
-        return [];
+        Fluttertoast.showToast(msg: 'Failed to sync with MongoDB');
       }
     } catch (e) {
-      print('Error fetching transactions from MongoDB: $e');
-      return [];
+      Fluttertoast.showToast(msg: 'Error syncing with MongoDB: $e');
     }
   }
 
-  Future<List<Map<String, dynamic>>> getUnsyncedTransactions() async {
+  Future<void> _updateLocalDatabase(List<dynamic> mongoTransactions) async {
     final db = await database;
-    List<Map<String, dynamic>> transactions = await db.query('transactions', where: 'synced = ?', whereArgs: [0]);
-    Fluttertoast.showToast(msg: 'Fetched ${transactions.length} unsynced transactions');
-    return transactions;
+    await db.transaction((txn) async {
+      for (var transaction in mongoTransactions) {
+        String mongoId = transaction['_id'];
+        List<Map> existingTransactions = await txn.query(
+          'transactions',
+          where: 'mongoId = ?',
+          whereArgs: [mongoId],
+        );
+
+        if (existingTransactions.isEmpty) {
+          // Insert new transaction
+          await txn.insert('transactions', {
+            'title': transaction['title'],
+            'amount': transaction['amount'],
+            'date': transaction['date'],
+            'type': transaction['type'],
+            'category': transaction['category'],
+            'synced': 1,
+            'mongoId': mongoId,
+          });
+        } else {
+          // Update existing transaction
+          await txn.update(
+            'transactions',
+            {
+              'title': transaction['title'],
+              'amount': transaction['amount'],
+              'date': transaction['date'],
+              'type': transaction['type'],
+              'category': transaction['category'],
+              'synced': 1,
+            },
+            where: 'mongoId = ?',
+            whereArgs: [mongoId],
+          );
+        }
+      }
+    });
   }
 
   Future<bool> deleteTransaction(int id) async {
     final db = await database;
+    Map<String, dynamic>? transaction = (await db.query(
+      'transactions',
+      where: 'id = ?',
+      whereArgs: [id],
+    )).firstOrNull;
+
+    if (transaction == null) {
+      Fluttertoast.showToast(msg: 'Transaction not found');
+      return false;
+    }
+
     int count = await db.delete('transactions', where: 'id = ?', whereArgs: [id]);
     
     if (count > 0) {
-      Fluttertoast.showToast(msg: 'Deleted transaction with id: $id from SQLite');
+      Fluttertoast.showToast(msg: 'Deleted transaction locally with id: $id');
       
-      // Delete from MongoDB
-      bool deletedFromMongo = await deleteTransactionFromMongoDB(id);
-      
-      if (deletedFromMongo) {
-        Fluttertoast.showToast(msg: 'Deleted transaction with id: $id from MongoDB');
-        return true;
-      } else {
-        Fluttertoast.showToast(msg: 'Failed to delete transaction with id: $id from MongoDB');
-        return false;
+      if (await isConnected() && transaction['mongoId'] != null) {
+        await deleteTransactionFromMongoDB(transaction['mongoId']);
       }
+      
+      return true;
     } else {
-      Fluttertoast.showToast(msg: 'Transaction with id: $id not found in SQLite');
+      Fluttertoast.showToast(msg: 'Failed to delete transaction locally');
       return false;
     }
   }
 
-  Future<bool> deleteTransactionFromMongoDB(int id) async {
+  Future<void> deleteTransactionFromMongoDB(String mongoId) async {
     try {
       final response = await http.delete(
-        Uri.parse('https://penny-wise-flutter.vercel.app/transactions/$id'),
+        Uri.parse('https://penny-wise-flutter.vercel.app/transactions/$mongoId'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
       );
 
       if (response.statusCode == 200) {
-        print('Transaction deleted from MongoDB with id: $id');
-        return true;
+        Fluttertoast.showToast(msg: 'Transaction deleted from MongoDB');
       } else {
-        print('Failed to delete transaction from MongoDB: ${response.statusCode}');
-        print('Response body: ${response.body}');
-        return false;
+        Fluttertoast.showToast(msg: 'Failed to delete transaction from MongoDB');
       }
     } catch (e) {
-      print('Error deleting transaction from MongoDB: $e');
-      return false;
+      Fluttertoast.showToast(msg: 'Error deleting transaction from MongoDB: $e');
     }
   }
 
@@ -168,11 +234,50 @@ class DBHelper {
       where: 'id = ?',
       whereArgs: [id],
     );
-    Fluttertoast.showToast(msg: 'Updated $count transaction(s) with id: $id');
-
-    await sendDataToMongoDB();
+    
+    if (count > 0) {
+      Fluttertoast.showToast(msg: 'Updated transaction locally with id: $id');
+      
+      if (await isConnected()) {
+        await updateTransactionInMongoDB(id, transaction);
+      }
+    } else {
+      Fluttertoast.showToast(msg: 'Failed to update transaction locally');
+    }
 
     return count;
+  }
+
+  Future<void> updateTransactionInMongoDB(int localId, Map<String, dynamic> transaction) async {
+    final db = await database;
+    List<Map> result = await db.query(
+      'transactions',
+      columns: ['mongoId'],
+      where: 'id = ?',
+      whereArgs: [localId],
+    );
+
+    if (result.isNotEmpty && result.first['mongoId'] != null) {
+      String mongoId = result.first['mongoId'];
+      try {
+        final response = await http.put(
+          Uri.parse('https://penny-wise-flutter.vercel.app/transactions/$mongoId'),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+          body: jsonEncode(transaction),
+        );
+
+        if (response.statusCode == 200) {
+          await markTransactionAsSynced(localId);
+          Fluttertoast.showToast(msg: 'Transaction updated in MongoDB');
+        } else {
+          Fluttertoast.showToast(msg: 'Failed to update transaction in MongoDB');
+        }
+      } catch (e) {
+        Fluttertoast.showToast(msg: 'Error updating transaction in MongoDB: $e');
+      }
+    }
   }
 
   Future<void> markTransactionAsSynced(int id) async {
@@ -183,34 +288,23 @@ class DBHelper {
       where: 'id = ?',
       whereArgs: [id],
     );
-    Fluttertoast.showToast(msg: 'Marked transaction as synced with id: $id');
   }
 
-  Future<void> sendDataToMongoDB() async {
-    final unsyncedTransactions = await getUnsyncedTransactions();
+  Future<void> syncUnsyncedTransactions() async {
+    if (await isConnected()) {
+      final db = await database;
+      List<Map<String, dynamic>> unsyncedTransactions = await db.query(
+        'transactions',
+        where: 'synced = ?',
+        whereArgs: [0],
+      );
 
-    for (var transaction in unsyncedTransactions) {
-      try {
-        final response = await http.post(
-          Uri.parse('https://penny-wise-flutter.vercel.app/transactions/add'),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-          },
-          body: jsonEncode(transaction),
-        );
-
-        if (response.statusCode == 201) {
-          await markTransactionAsSynced(transaction['id']);
-          print('Transaction sent to MongoDB and marked as synced with id: ${transaction['id']}');
-          Fluttertoast.showToast(msg: 'Transaction sent to MongoDB and marked as synced with id: ${transaction['id']}');
+      for (var transaction in unsyncedTransactions) {
+        if (transaction['mongoId'] == null) {
+          await sendTransactionToMongoDB(transaction, transaction['id']);
         } else {
-          print('Failed to send transaction to MongoDB: ${response.statusCode}');
-          print('Response body: ${response.body}');
-          Fluttertoast.showToast(msg: 'Failed to send transaction to MongoDB with id: ${transaction['id']}');
+          await updateTransactionInMongoDB(transaction['id'], transaction);
         }
-      } catch (e) {
-        print('Error sending transaction to MongoDB: $e');
-        Fluttertoast.showToast(msg: 'Error sending transaction to MongoDB: $e');
       }
     }
   }
