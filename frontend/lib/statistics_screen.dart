@@ -4,18 +4,18 @@ import 'pie_chart.dart';
 
 class StatisticsScreen extends StatelessWidget {
   final List<Color> expenseColors = [
-    Color.fromARGB(255, 244, 67, 54),
-    Colors.orange,
-    Colors.yellow,
-    Color.fromARGB(255, 37, 96, 145),
-    Colors.brown,
-  ];
+  Color.fromARGB(255, 199, 129, 143),
+  Color.fromARGB(255, 255, 204, 128), 
+  Color.fromARGB(255, 255, 236, 179), 
+  Color.fromARGB(255, 179, 205, 224), 
+  Color.fromARGB(255, 224, 187, 162), 
+];
 
-  final List<Color> incomeColors = [
-    Colors.green,
-    Colors.blue,
-    Colors.purple,
-  ];
+final List<Color> incomeColors = [
+  Color.fromARGB(255, 167, 255, 186),
+  Color.fromARGB(255, 179, 209, 255),
+  Color.fromARGB(255, 220, 190, 255),
+];
 
   @override
   Widget build(BuildContext context) {
