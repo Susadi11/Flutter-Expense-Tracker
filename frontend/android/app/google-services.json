@@ -9,7 +9,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:471151829832:android:2ba4d8c3110ef63b63c97d",
         "android_client_info": {
-          "package_name": "com.randil.pennywise"
+          "package_name": "com.example.expense_tracker"
         }
       },
       "oauth_client": [],
