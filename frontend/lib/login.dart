@@ -53,7 +53,7 @@ class _LoginState extends State<Login> {
                 keyboardType: TextInputType.emailAddress,
                 decoration: InputDecoration(
                   labelText: "Email",
-                   prefixIcon: Icon(Icons.email_outlined),
+                  prefixIcon: Icon(Icons.email_outlined),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
@@ -132,7 +132,7 @@ class _LoginState extends State<Login> {
                       ),
                     ),
                     onPressed: () {
-                      // Add your Google Signup logic here
+                      _loginWithGoogle();
                     },
                     icon: const FaIcon(
                       FontAwesomeIcons.google,
@@ -201,6 +201,35 @@ class _LoginState extends State<Login> {
       } else {
         // The toast message will be shown by the FirebaseAuthService
       }
+    }
+  }
+
+  void _loginWithGoogle() async {
+    setState(() {
+      isLoggingIn = true;
+    });
+
+    User? user = await _auth.signInWithGoogle();
+
+    setState(() {
+      isLoggingIn = false;
+    });
+
+    if (user != null) {
+      _boxLogin.put("loginStatus", true);
+      _boxLogin.put("userEmail", user.email);
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => Profile(
+            username: user.displayName ?? 'User',
+            email: user.email ?? 'email@example.com',
+          ),
+        ),
+      );
+    } else {
+      // The toast message will be shown by the FirebaseAuthService
     }
   }
 

@@ -1,5 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
-
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:expense_tracker/toast.dart';
 
 
@@ -41,7 +41,28 @@ class FirebaseAuthService {
 
   }
 
+  Future<User?> signInWithGoogle() async {
+      try {
+        final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+        if (googleUser == null) {
+          showToast(message: "Google sign-in was canceled");
+          return null;
+        }
 
+        final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+
+        final AuthCredential credential = GoogleAuthProvider.credential(
+          accessToken: googleAuth.accessToken,
+          idToken: googleAuth.idToken,
+        );
+
+        UserCredential userCredential = await _auth.signInWithCredential(credential);
+        return userCredential.user;
+      } catch (e) {
+        showToast(message: "Failed to sign in with Google");
+        return null;
+      }
+    }
 
 
 }
