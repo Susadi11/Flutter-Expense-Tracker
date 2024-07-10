@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:expense_tracker/user_auth/firebase_auth_implementation/firebase_auth_services.dart';
 import 'signup.dart';
 import 'profile.dart';
+import 'forgot_password.dart';
 
 class Login extends StatefulWidget {
   const Login({Key? key}) : super(key: key);
@@ -103,7 +104,21 @@ class _LoginState extends State<Login> {
                   return null;
                 },
               ),
-              const SizedBox(height: 60),
+              const SizedBox(height: 10),
+              TextButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) {
+                        return const ForgotPassword();
+                      },
+                    ),
+                  );
+                },
+                child: const Text("Forgot Password?"),
+              ),
+              const SizedBox(height: 50),
               Column(
                 children: [
                   ElevatedButton(
