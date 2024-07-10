@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'login.dart';
 import 'settings_screen.dart';
+import 'edit_profile.dart';
 
 class Profile extends StatelessWidget {
   final String username;
@@ -56,7 +57,17 @@ class Profile extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       FloatingActionButton.extended(
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => EditProfile(
+                                username: username,
+                                email: email,
+                              ),
+                            ),
+                          );
+                        },
                         heroTag: 'edit',
                         elevation: 0,
                         label: const Text("Edit"),
