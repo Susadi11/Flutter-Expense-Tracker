@@ -1,23 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'theme_notifier.dart'; // Import your ThemeNotifier class
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_core/firebase_core.dart';
+
+// Assume these files exist in your project
+import 'theme_notifier.dart';
 import 'add_transaction.dart';
 import 'home_screen.dart';
 import 'statistics_screen.dart';
-import 'profile.dart'; // Ensure this import is correct
-import 'package:firebase_core/firebase_core.dart';
+import 'profile.dart';
+import 'onboardingScreen1.dart';
+import 'login.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(); // Initialize Firebase
-  await Hive.initFlutter(); // Initialize Hive
-  await Hive.openBox('login'); // Open 'login' box
-  await Hive.openBox('accounts'); // Open 'accounts' box
+  await Firebase.initializeApp();
+  await Hive.initFlutter();
+  await Hive.openBox('login');
+  await Hive.openBox('accounts');
 
   runApp(
     ChangeNotifierProvider(
-      create: (_) => ThemeNotifier(), // Create an instance of ThemeNotifier
+      create: (_) => ThemeNotifier(),
       child: FinanceTrackerApp(),
     ),
   );
@@ -34,12 +39,26 @@ class FinanceTrackerApp extends StatelessWidget {
             primarySwatch: Colors.red,
             brightness: themeNotifier.isDarkTheme
                 ? Brightness.dark
-                : Brightness.light, // Use the theme from ThemeNotifier
+                : Brightness.light,
           ),
-          home: HomePage(),
+          home: FutureBuilder<bool>(
+            future: _checkOnboardingComplete(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return CircularProgressIndicator();
+              } else {
+                return snapshot.data == true ? Login() : OnboardingScreen();
+              }
+            },
+          ),
         );
       },
     );
+  }
+
+  Future<bool> _checkOnboardingComplete() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getBool('onboardingComplete') ?? false;
   }
 }
 
@@ -53,17 +72,16 @@ class _HomePageState extends State<HomePage> {
   String username = "Username"; // Example value, replace with actual data
   String email = "email@example.com"; // Example value, replace with actual data
 
-  final List<Widget> _widgetOptions = [];
+  late List<Widget> _widgetOptions;
 
   @override
   void initState() {
     super.initState();
-    // Initialize the widget options list with the username and email
-    _widgetOptions.addAll([
+    _widgetOptions = [
       HomeScreen(),
       StatisticsScreen(),
       Profile(username: username, email: email),
-    ]);
+    ];
   }
 
   void _onItemTapped(int index) {

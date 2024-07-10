@@ -1,21 +1,30 @@
 import 'package:flutter/material.dart';
 import 'db_helper.dart';
 import 'pie_chart.dart';
+import 'home_screen.dart';
+import 'profile.dart';
 
-class StatisticsScreen extends StatelessWidget {
+class StatisticsScreen extends StatefulWidget {
+  @override
+  _StatisticsScreenState createState() => _StatisticsScreenState();
+}
+
+class _StatisticsScreenState extends State<StatisticsScreen> {
+  int _selectedIndex = 1;
+
   final List<Color> expenseColors = [
-  Color.fromARGB(255, 199, 129, 143),
-  Color.fromARGB(255, 255, 204, 128), 
-  Color.fromARGB(255, 255, 236, 179), 
-  Color.fromARGB(255, 179, 205, 224), 
-  Color.fromARGB(255, 224, 187, 162), 
-];
+    Color.fromARGB(255, 199, 129, 143),
+    Color.fromARGB(255, 255, 204, 128),
+    Color.fromARGB(255, 255, 236, 179),
+    Color.fromARGB(255, 179, 205, 224),
+    Color.fromARGB(255, 224, 187, 162),
+  ];
 
-final List<Color> incomeColors = [
-  Color.fromARGB(255, 167, 255, 186),
-  Color.fromARGB(255, 179, 209, 255),
-  Color.fromARGB(255, 220, 190, 255),
-];
+  final List<Color> incomeColors = [
+    Color.fromARGB(255, 167, 255, 186),
+    Color.fromARGB(255, 179, 209, 255),
+    Color.fromARGB(255, 220, 190, 255),
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -121,6 +130,43 @@ final List<Color> incomeColors = [
             }
           },
         ),
+      ),
+      bottomNavigationBar: NavigationBar(
+        animationDuration: const Duration(seconds: 1),
+        selectedIndex: _selectedIndex,
+        onDestinationSelected: (index) {
+          setState(() {
+            _selectedIndex = index;
+          });
+          if (index == 0) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => HomeScreen()),
+            );
+          } else if (index == 2) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => Profile(username: 'Username', email: 'email@example.com')),
+            );
+          }
+        },
+        destinations: const [
+          NavigationDestination(
+            icon: Icon(Icons.home_outlined),
+            selectedIcon: Icon(Icons.home_rounded),
+            label: 'Home',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.bar_chart),
+            selectedIcon: Icon(Icons.bar_chart_rounded),
+            label: 'Statistics',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.person_outline),
+            selectedIcon: Icon(Icons.person),
+            label: 'Profile',
+          ),
+        ],
       ),
     );
   }
@@ -235,7 +281,7 @@ final List<Color> incomeColors = [
   Map<String, double> _convertToPercentages(Map<String, double> data) {
     double total = data.values.fold(0, (a, b) => a + b);
     if (total == 0) {
-      return data; // Return the original map with 0 values if there's no data
+      return data;
     }
     return data.map((key, value) => MapEntry(key, value / total));
   }

@@ -3,8 +3,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'login.dart';
 import 'settings_screen.dart';
 import 'edit_profile.dart';
+import 'home_screen.dart';
+import 'statistics_screen.dart';
 
-class Profile extends StatelessWidget {
+class Profile extends StatefulWidget {
   final String username;
   final String email;
 
@@ -13,6 +15,13 @@ class Profile extends StatelessWidget {
     required this.username,
     required this.email,
   }) : super(key: key);
+
+  @override
+  _ProfileState createState() => _ProfileState();
+}
+
+class _ProfileState extends State<Profile> {
+  int _selectedIndex = 2;  // Set to 2 for Profile
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +50,7 @@ class Profile extends StatelessWidget {
               child: Column(
                 children: [
                   Text(
-                    username,
+                    widget.username,
                     style: Theme.of(context)
                         .textTheme
                         .headlineSmall
@@ -49,7 +58,7 @@ class Profile extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    email,
+                    widget.email,
                     style: Theme.of(context).textTheme.bodyLarge,
                   ),
                   const SizedBox(height: 16),
@@ -62,8 +71,8 @@ class Profile extends StatelessWidget {
                             context,
                             MaterialPageRoute(
                               builder: (context) => EditProfile(
-                                username: username,
-                                email: email,
+                                username: widget.username,
+                                email: widget.email,
                               ),
                             ),
                           );
@@ -98,6 +107,43 @@ class Profile extends StatelessWidget {
           ),
         ],
       ),
+      bottomNavigationBar: NavigationBar(
+        animationDuration: const Duration(seconds: 1),
+        selectedIndex: _selectedIndex,
+        onDestinationSelected: (index) {
+          setState(() {
+            _selectedIndex = index;
+          });
+          if (index == 0) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => HomeScreen()),
+            );
+          } else if (index == 1) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => StatisticsScreen()),
+            );
+          }
+        },
+        destinations: const [
+          NavigationDestination(
+            icon: Icon(Icons.home_outlined),
+            selectedIcon: Icon(Icons.home_rounded),
+            label: 'Home',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.bar_chart),
+            selectedIcon: Icon(Icons.bar_chart_rounded),
+            label: 'Statistics',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.person_outline),
+            selectedIcon: Icon(Icons.person),
+            label: 'Profile',
+          ),
+        ],
+      ),
     );
   }
 }
@@ -108,7 +154,7 @@ class _TopPortion extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Stack(
-      fit: StackFit.expand,
+     fit: StackFit.expand,
       children: [
         Container(
           margin: const EdgeInsets.only(bottom: 50),
@@ -132,6 +178,7 @@ class _TopPortion extends StatelessWidget {
               children: [
                 Container(
                   decoration: const BoxDecoration(
+                    color: Colors.black,
                     shape: BoxShape.circle,
                     image: DecorationImage(
                       fit: BoxFit.cover,
