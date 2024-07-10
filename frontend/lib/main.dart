@@ -5,10 +5,8 @@ import 'theme_notifier.dart'; // Import your ThemeNotifier class
 import 'add_transaction.dart';
 import 'home_screen.dart';
 import 'statistics_screen.dart';
-import 'settings_screen.dart';
 import 'profile.dart'; // Ensure this import is correct
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

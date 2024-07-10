@@ -87,65 +87,77 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           children: [
             Row(
-              children: [
-                Expanded(
-                  child: DropdownButtonFormField<String>(
-                    value: _selectedSort,
-                    onChanged: (newValue) {
-                      setState(() {
-                        _selectedSort = newValue!;
-                        if (_selectedSort == 'Amount (Ascending)') {
-                          _sortTransactionsByAmount(true);
-                        } else if (_selectedSort == 'Amount (Descending)') {
-                          _sortTransactionsByAmount(false);
-                        } else if (_selectedSort == 'Newest First') {
-                          _sortTransactionsByDate(true);
-                        } else if (_selectedSort == 'Oldest First') {
-                          _sortTransactionsByDate(false);
-                        }
-                      });
-                    },
-                    items: <String>[
-                      'Newest First',
-                      'Oldest First',
-                      'Amount (Ascending)',
-                      'Amount (Descending)',
-                    ].map<DropdownMenuItem<String>>((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value),
-                      );
-                    }).toList(),
-                    decoration: InputDecoration(
-                      labelText: 'Sort By',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                ),
-                SizedBox(width: 16),
-                Expanded(
-                  child: DropdownButtonFormField<String>(
-                    value: _selectedCategory,
-                    onChanged: (newValue) {
-                      setState(() {
-                        _selectedCategory = newValue!;
-                      });
-                    },
-                    items: <String>['All', 'Income', 'Expense']
-                        .map<DropdownMenuItem<String>>((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value),
-                      );
-                    }).toList(),
-                    decoration: InputDecoration(
-                      labelText: 'Category',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                ),
-              ],
-            ),
+  children: [
+    Expanded(
+      flex: 3,
+      child: DropdownButtonFormField<String>(
+        value: _selectedSort,
+        onChanged: (newValue) {
+          setState(() {
+            _selectedSort = newValue!;
+            if (_selectedSort == 'Newest First') {
+              _sortTransactionsByDate(true);
+            } else if (_selectedSort == 'Oldest First') {
+              _sortTransactionsByDate(false);
+            } else if (_selectedSort == 'Amount (Ascending)') {
+              _sortTransactionsByAmount(true);
+            } else if (_selectedSort == 'Amount (Descending)') {
+              _sortTransactionsByAmount(false);
+            }
+          });
+        },
+        items: <String>[
+          'Newest First',
+          'Oldest First',
+          'Amount (Ascending)',
+          'Amount (Descending)',
+        ].map<DropdownMenuItem<String>>((String value) {
+          return DropdownMenuItem<String>(
+            value: value,
+            child: Text(value),
+          );
+        }).toList(),
+        decoration: InputDecoration(
+          labelText: 'Sort By',
+          border: OutlineInputBorder(),
+          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        ),
+        icon: Icon(Icons.arrow_drop_down),
+        isExpanded: true,
+        style: TextStyle(color: Colors.black, fontSize: 16),
+        dropdownColor: Colors.white,
+      ),
+    ),
+    SizedBox(width: 16),
+    Expanded(
+      flex: 2,
+      child: DropdownButtonFormField<String>(
+        value: _selectedCategory,
+        onChanged: (newValue) {
+          setState(() {
+            _selectedCategory = newValue!;
+          });
+        },
+        items: <String>['All', 'Income', 'Expense']
+            .map<DropdownMenuItem<String>>((String value) {
+          return DropdownMenuItem<String>(
+            value: value,
+            child: Text(value),
+          );
+        }).toList(),
+        decoration: InputDecoration(
+          labelText: 'Category',
+          border: OutlineInputBorder(),
+          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        ),
+        icon: Icon(Icons.arrow_drop_down),
+        isExpanded: true,
+        style: TextStyle(color: Colors.black, fontSize: 16),
+        dropdownColor: Colors.white,
+      ),
+    ),
+  ],
+),
             SizedBox(height: 16),
             Wrap(
               spacing: 8.0,
