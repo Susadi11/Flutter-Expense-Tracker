@@ -3,8 +3,8 @@ import 'package:provider/provider.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:local_auth/local_auth.dart';
 
-// Assume these files exist in your project
 import 'theme_notifier.dart';
 import 'add_transaction.dart';
 import 'home_screen.dart';
@@ -47,7 +47,7 @@ class FinanceTrackerApp extends StatelessWidget {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return CircularProgressIndicator();
               } else {
-                return snapshot.data == true ? Login() : OnboardingScreen();
+                return snapshot.data == true ? AuthCheckScreen() : OnboardingScreen();
               }
             },
           ),
@@ -59,6 +59,70 @@ class FinanceTrackerApp extends StatelessWidget {
   Future<bool> _checkOnboardingComplete() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     return prefs.getBool('onboardingComplete') ?? false;
+  }
+}
+
+class AuthCheckScreen extends StatefulWidget {
+  @override
+  _AuthCheckScreenState createState() => _AuthCheckScreenState();
+}
+
+class _AuthCheckScreenState extends State<AuthCheckScreen> {
+  final LocalAuthentication _localAuthentication = LocalAuthentication();
+
+  @override
+  void initState() {
+    super.initState();
+    _checkAuth();
+  }
+
+  Future<void> _checkAuth() async {
+    bool isAuthenticated = await _authenticate();
+    if (isAuthenticated) {
+      _navigateToHome();
+    } else {
+      _navigateToLogin();
+    }
+  }
+
+  Future<bool> _authenticate() async {
+    try {
+      bool canCheckBiometrics = await _localAuthentication.canCheckBiometrics;
+      if (!canCheckBiometrics) {
+        return false;
+      }
+      bool isAuthenticated = await _localAuthentication.authenticate(
+        localizedReason: 'Please authenticate to access the app',
+        options: const AuthenticationOptions(
+          biometricOnly: true,
+          stickyAuth: true,
+        ),
+      );
+      return isAuthenticated;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  void _navigateToHome() {
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (context) => HomePage()),
+    );
+  }
+
+  void _navigateToLogin() {
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (context) => Login()),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
   }
 }
 
