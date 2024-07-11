@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:io';
+
 import 'login.dart';
 import 'settings_screen.dart';
 import 'edit_profile.dart';
@@ -21,7 +25,7 @@ class Profile extends StatefulWidget {
 }
 
 class _ProfileState extends State<Profile> {
-  int _selectedIndex = 2;  // Set to 2 for Profile
+  int _selectedIndex = 2; // Set to 2 for Profile
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +46,10 @@ class _ProfileState extends State<Profile> {
       ),
       body: Column(
         children: [
-          const Expanded(flex: 2, child: _TopPortion()),
+          Expanded(
+            flex: 2,
+            child: _TopPortion(email: widget.email),
+          ),
           Expanded(
             flex: 3,
             child: Padding(
@@ -53,13 +60,13 @@ class _ProfileState extends State<Profile> {
                     widget.username,
                     style: Theme.of(context)
                         .textTheme
-                        .headlineSmall
-                        ?.copyWith(fontWeight: FontWeight.bold),
+                        .titleLarge!
+                        .copyWith(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 16),
                   Text(
                     widget.email,
-                    style: Theme.of(context).textTheme.bodyLarge,
+                    style: Theme.of(context).textTheme.bodyMedium!,
                   ),
                   const SizedBox(height: 16),
                   Row(
@@ -78,7 +85,6 @@ class _ProfileState extends State<Profile> {
                           );
                         },
                         heroTag: 'edit',
-                        elevation: 0,
                         label: const Text("Edit"),
                         icon: const Icon(Icons.edit),
                       ),
@@ -88,12 +94,12 @@ class _ProfileState extends State<Profile> {
                           await FirebaseAuth.instance.signOut();
                           Navigator.pushAndRemoveUntil(
                             context,
-                            MaterialPageRoute(builder: (context) => const Login()),
+                            MaterialPageRoute(
+                                builder: (context) => const Login()),
                             (Route<dynamic> route) => false,
                           );
                         },
                         heroTag: 'signout',
-                        elevation: 0,
                         backgroundColor: Colors.red,
                         label: const Text("Sign Out"),
                         icon: const Icon(Icons.exit_to_app),
@@ -148,65 +154,197 @@ class _ProfileState extends State<Profile> {
   }
 }
 
-class _TopPortion extends StatelessWidget {
-  const _TopPortion({Key? key}) : super(key: key);
+class _TopPortion extends StatefulWidget {
+  final String email;
+
+  const _TopPortion({Key? key, required this.email}) : super(key: key);
+
+  @override
+  _TopPortionState createState() => _TopPortionState();
+}
+
+class _TopPortionState extends State<_TopPortion> {
+  File? _backgroundImage;
+  File? _profileImage;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadImages();
+  }
+
+  Future<void> _loadImages() async {
+    final prefs = await SharedPreferences.getInstance();
+    final backgroundImagePath =
+        prefs.getString('${widget.email}_backgroundImagePath');
+    final profileImagePath =
+        prefs.getString('${widget.email}_profileImagePath');
+
+    setState(() {
+      if (backgroundImagePath != null) {
+        _backgroundImage = File(backgroundImagePath);
+      }
+      if (profileImagePath != null) {
+        _profileImage = File(profileImagePath);
+      }
+    });
+  }
+
+  Future<void> _pickImage(ImageSource source, String imageType) async {
+    final pickedFile = await ImagePicker().pickImage(source: source);
+    if (pickedFile != null) {
+      final prefs = await SharedPreferences.getInstance();
+      setState(() {
+        if (imageType == 'background') {
+          _backgroundImage = File(pickedFile.path);
+          prefs.setString(
+              '${widget.email}_backgroundImagePath', pickedFile.path);
+        } else {
+          _profileImage = File(pickedFile.path);
+          prefs.setString('${widget.email}_profileImagePath', pickedFile.path);
+        }
+      });
+    }
+  }
+
+  void _showImageOptions(File? image, String imageType) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (image != null)
+                GestureDetector(
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => Scaffold(
+                          appBar: AppBar(
+                            title: Text(imageType == 'background' ? 'Background Image' : 'Profile Image'),
+                          ),
+                          body: Center(
+                            child: InteractiveViewer(
+                              panEnabled: true,
+                              boundaryMargin: EdgeInsets.all(20),
+                              minScale: 0.5,
+                              maxScale: 4,
+                              child: Image.file(image),
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                  child: FittedBox(
+                    fit: BoxFit.contain,
+                    child: Image.file(image),
+                  ),
+                ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  TextButton(
+                    onPressed: () async {
+                      setState(() {
+                        if (imageType == 'background') {
+                          _backgroundImage = null;
+                          SharedPreferences.getInstance().then((prefs) {
+                            prefs.remove('${widget.email}_backgroundImagePath');
+                          });
+                        } else {
+                          _profileImage = null;
+                          SharedPreferences.getInstance().then((prefs) {
+                            prefs.remove('${widget.email}_profileImagePath');
+                          });
+                        }
+                      });
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text('Remove'),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      _pickImage(ImageSource.gallery, imageType);
+                    },
+                    child: const Text('Add New'),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Stack(
-     fit: StackFit.expand,
+      fit: StackFit.expand,
       children: [
-        Container(
-          margin: const EdgeInsets.only(bottom: 50),
-          decoration: const BoxDecoration(
-            color: Colors.black,
-            image: DecorationImage(
-              fit: BoxFit.cover,
-              image: NetworkImage(
-                'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQMrYE5dTA2hr1JGLuYZQv_L218986OZ0ogjDPSdIolTV1_pmLVtDRjd1gcTu4cJ9b2CV8&usqp=CAU',
+        GestureDetector(
+          onTap: () => _showImageOptions(_backgroundImage, 'background'),
+          child: Container(
+            margin: const EdgeInsets.only(bottom: 50),
+            decoration: BoxDecoration(
+              color: Colors.black,
+              image: DecorationImage(
+                fit: BoxFit.cover,
+                image: _backgroundImage != null
+                    ? FileImage(_backgroundImage!)
+                    : const NetworkImage(
+                        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQMrYE5dTA2hr1JGLuYZQv_L218986OZ0ogjDPSdIolTV1_pmLVtDRjd1gcTu4cJ9b2CV8&usqp=CAU',
+                      ) as ImageProvider<Object>,
               ),
             ),
           ),
         ),
         Align(
           alignment: Alignment.bottomCenter,
-          child: SizedBox(
-            width: 150,
-            height: 150,
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                Container(
-                  decoration: const BoxDecoration(
-                    color: Colors.black,
-                    shape: BoxShape.circle,
-                    image: DecorationImage(
-                      fit: BoxFit.cover,
-                      image: NetworkImage(
-                        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQMrYE5dTA2hr1JGLuYZQv_L218986OZ0ogjDPSdIolTV1_pmLVtDRjd1gcTu4cJ9b2CV8&usqp=CAU',
+          child: GestureDetector(
+            onTap: () => _showImageOptions(_profileImage, 'profile'),
+            child: SizedBox(
+              width: 150,
+              height: 150,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.black,
+                      shape: BoxShape.circle,
+                      image: DecorationImage(
+                        fit: BoxFit.cover,
+                        image: _profileImage != null
+                            ? FileImage(_profileImage!)
+                            : const NetworkImage(
+                                'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQMrYE5dTA2hr1JGLuYZQv_L218986OZ0ogjDPSdIolTV1_pmLVtDRjd1gcTu4cJ9b2CV8&usqp=CAU',
+                              ) as ImageProvider<Object>,
                       ),
                     ),
                   ),
-                ),
-                Positioned(
-                  bottom: 0,
-                  right: 0,
-                  child: CircleAvatar(
-                    radius: 20,
-                    backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-                    child: Container(
-                      margin: const EdgeInsets.all(8.0),
-                      decoration: const BoxDecoration(
-                        color: Colors.green,
-                        shape: BoxShape.circle,
+                  Positioned(
+                    bottom: 0,
+                    right: 0,
+                    child: CircleAvatar(
+                      radius: 20,
+                      backgroundColor:
+                          Theme.of(context).scaffoldBackgroundColor,
+                      child: IconButton(
+                        icon: Icon(Icons.camera_alt),
+                        onPressed: () =>
+                            _pickImage(ImageSource.gallery, 'profile'),
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
-        )
+        ),
       ],
     );
   }
