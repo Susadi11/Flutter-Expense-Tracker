@@ -133,15 +133,27 @@ class _EditProfileState extends State<EditProfile> {
       appBar: AppBar(
         title: const Text('Edit Profile'),
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Text(
+                'Change Password',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 20),
               TextFormField(
                 controller: _passwordController,
-                decoration: const InputDecoration(labelText: 'Current Password'),
+                decoration: const InputDecoration(
+                  labelText: 'Current Password',
+                  border: OutlineInputBorder(),
+                ),
                 obscureText: true,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -150,9 +162,13 @@ class _EditProfileState extends State<EditProfile> {
                   return null;
                 },
               ),
+              const SizedBox(height: 20),
               TextFormField(
                 controller: _newPasswordController,
-                decoration: const InputDecoration(labelText: 'New Password'),
+                decoration: const InputDecoration(
+                  labelText: 'New Password',
+                  border: OutlineInputBorder(),
+                ),
                 obscureText: true,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -161,9 +177,13 @@ class _EditProfileState extends State<EditProfile> {
                   return null;
                 },
               ),
+              const SizedBox(height: 20),
               TextFormField(
                 controller: _confirmNewPasswordController,
-                decoration: const InputDecoration(labelText: 'Confirm New Password'),
+                decoration: const InputDecoration(
+                  labelText: 'Confirm New Password',
+                  border: OutlineInputBorder(),
+                ),
                 obscureText: true,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -173,15 +193,25 @@ class _EditProfileState extends State<EditProfile> {
                 },
               ),
               const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _changePassword,
-                child: const Text('Change Password'),
+              Center(
+                child: ElevatedButton(
+                  onPressed: _changePassword,
+                  style: ElevatedButton.styleFrom(
+                    padding: EdgeInsets.symmetric(horizontal: 40, vertical: 20),
+                  ),
+                  child: const Text('Change Password'),
+                ),
               ),
               const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _deleteAccount,
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                child: const Text('Delete Account'),
+              Center(
+                child: ElevatedButton(
+                  onPressed: _deleteAccount,
+                  style: ElevatedButton.styleFrom(
+                    padding: EdgeInsets.symmetric(horizontal: 40, vertical: 20),
+                    backgroundColor: Colors.red,
+                  ),
+                  child: const Text('Delete Account'),
+                ),
               ),
             ],
           ),
