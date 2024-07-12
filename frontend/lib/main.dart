@@ -12,6 +12,7 @@ import 'statistics_screen.dart';
 import 'profile.dart';
 import 'onboardingScreen1.dart';
 import 'login.dart';
+import 'home_wrapper.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -28,7 +29,12 @@ void main() async {
   );
 }
 
-class FinanceTrackerApp extends StatelessWidget {
+class FinanceTrackerApp extends StatefulWidget {
+  @override
+  _FinanceTrackerAppState createState() => _FinanceTrackerAppState();
+}
+
+class _FinanceTrackerAppState extends State<FinanceTrackerApp> {
   @override
   Widget build(BuildContext context) {
     return Consumer<ThemeNotifier>(
@@ -45,12 +51,18 @@ class FinanceTrackerApp extends StatelessWidget {
             future: _checkOnboardingComplete(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return CircularProgressIndicator();
+                return Scaffold(
+                  body: Center(child: CircularProgressIndicator()),
+                );
               } else {
                 return snapshot.data == true ? AuthCheckScreen() : OnboardingScreen();
               }
             },
           ),
+          routes: {
+             '/login': (context) => Login(),
+             '/home': (context) => HomeWrapper(),
+},
         );
       },
     );
@@ -69,6 +81,7 @@ class AuthCheckScreen extends StatefulWidget {
 
 class _AuthCheckScreenState extends State<AuthCheckScreen> {
   final LocalAuthentication _localAuthentication = LocalAuthentication();
+  final Box _boxLogin = Hive.box("login");
 
   @override
   void initState() {
@@ -79,7 +92,12 @@ class _AuthCheckScreenState extends State<AuthCheckScreen> {
   Future<void> _checkAuth() async {
     bool isAuthenticated = await _authenticate();
     if (isAuthenticated) {
-      _navigateToHome();
+      String? userId = _boxLogin.get("userId");
+      if (userId != null) {
+        _navigateToHome(userId);
+      } else {
+        _navigateToLogin();
+      }
     } else {
       _navigateToLogin();
     }
@@ -104,9 +122,9 @@ class _AuthCheckScreenState extends State<AuthCheckScreen> {
     }
   }
 
-  void _navigateToHome() {
+  void _navigateToHome(String userId) {
     Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (context) => HomePage()),
+      MaterialPageRoute(builder: (context) => HomePage(userId: userId)), // Pass userId to HomePage
     );
   }
 
@@ -127,6 +145,10 @@ class _AuthCheckScreenState extends State<AuthCheckScreen> {
 }
 
 class HomePage extends StatefulWidget {
+  final String userId; // Declare userId as a parameter
+
+  const HomePage({Key? key, required this.userId}) : super(key: key);
+
   @override
   _HomePageState createState() => _HomePageState();
 }
@@ -142,9 +164,9 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     _widgetOptions = [
-      HomeScreen(),
-      StatisticsScreen(),
-      Profile(username: username, email: email),
+      HomeScreen(userId: widget.userId), // Pass userId to HomeScreen
+      StatisticsScreen(userId: widget.userId),
+      Profile(username: username, email: email, userId: widget.userId),
     ];
   }
 
@@ -186,6 +208,7 @@ class _HomePageState extends State<HomePage> {
             MaterialPageRoute(
               builder: (context) => AddTransactionPage(
                 onAddTransaction: () {}, // Provide a default no-op callback
+                userId: widget.userId, // Pass userId to AddTransactionPage
               ),
             ),
           );

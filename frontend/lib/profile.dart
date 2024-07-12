@@ -13,11 +13,13 @@ import 'statistics_screen.dart';
 class Profile extends StatefulWidget {
   final String username;
   final String email;
+  final String userId;  // Add this line
 
   const Profile({
     Key? key,
     required this.username,
     required this.email,
+    required this.userId,  // Add this line
   }) : super(key: key);
 
   @override
@@ -123,12 +125,12 @@ class _ProfileState extends State<Profile> {
           if (index == 0) {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => HomeScreen()),
+              MaterialPageRoute(builder: (context) => HomeScreen(userId: widget.userId)),  // Update this line
             );
           } else if (index == 1) {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => StatisticsScreen()),
+              MaterialPageRoute(builder: (context) => StatisticsScreen(userId: widget.userId)),
             );
           }
         },

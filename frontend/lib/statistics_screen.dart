@@ -5,6 +5,10 @@ import 'home_screen.dart';
 import 'profile.dart';
 
 class StatisticsScreen extends StatefulWidget {
+  final String userId;
+
+  const StatisticsScreen({Key? key, required this.userId}) : super(key: key);
+
   @override
   _StatisticsScreenState createState() => _StatisticsScreenState();
 }
@@ -141,12 +145,12 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           if (index == 0) {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => HomeScreen()),
+              MaterialPageRoute(builder: (context) => HomeScreen(userId: widget.userId)),
             );
           } else if (index == 2) {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => Profile(username: 'Username', email: 'email@example.com')),
+              MaterialPageRoute(builder: (context) => Profile(username: 'Username', email: 'email@example.com', userId: widget.userId)),
             );
           }
         },
@@ -172,7 +176,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   }
 
   Future<Map<String, dynamic>> _calculateStatistics() async {
-    final transactions = await DBHelper().getTransactions();
+    final transactions = await DBHelper().getTransactions(widget.userId);
 
     if (transactions.isEmpty) {
       return {

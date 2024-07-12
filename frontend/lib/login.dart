@@ -208,7 +208,7 @@ class _LoginState extends State<Login> {
           MaterialPageRoute(
             builder: (context) => Profile(
               username: user.displayName ?? 'User',
-              email: user.email ?? 'email@example.com',
+              email: user.email ?? 'email@example.com', userId: '',
             ),
           ),
         );
@@ -238,7 +238,7 @@ class _LoginState extends State<Login> {
         MaterialPageRoute(
           builder: (context) => Profile(
             username: user.displayName ?? 'User',
-            email: user.email ?? 'email@example.com',
+            email: user.email ?? 'email@example.com', userId: user.uid,
           ),
         ),
       );

@@ -4,8 +4,9 @@ import 'db_helper.dart';
 class AddTransactionPage extends StatefulWidget {
   final Function onAddTransaction;
   final Map<String, dynamic>? transactionToEdit;
+  final String userId;
 
-  AddTransactionPage({required this.onAddTransaction, this.transactionToEdit});
+  AddTransactionPage({required this.onAddTransaction, this.transactionToEdit, required this.userId});
 
   @override
   _AddTransactionPageState createState() => _AddTransactionPageState();
@@ -56,10 +57,10 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
 
       try {
         if (widget.transactionToEdit != null) {
-          await DBHelper().updateTransaction(widget.transactionToEdit!['id'], transaction);
+          await DBHelper().updateTransaction(widget.transactionToEdit!['id'], transaction, widget.userId);
           print('Transaction updated successfully.');
         } else {
-          await DBHelper().insertTransaction(transaction);
+          await DBHelper().insertTransaction(transaction, widget.userId);
           print('Transaction inserted successfully.');
         }
 

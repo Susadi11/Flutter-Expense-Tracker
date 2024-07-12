@@ -3,10 +3,10 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:expense_tracker/user_auth/firebase_auth_implementation/firebase_auth_services.dart';
 import 'package:expense_tracker/toast.dart';
-import 'home_screen.dart';
+import 'package:expense_tracker/home_screen.dart'; // Ensure this import is correct
 
 class Signup extends StatefulWidget {
-  const Signup({super.key});
+  const Signup({Key? key}) : super(key: key);
 
   @override
   State<Signup> createState() => _SignupState();
@@ -21,8 +21,8 @@ class _SignupState extends State<Signup> {
   final TextEditingController _controllerUsername = TextEditingController();
   final TextEditingController _controllerEmail = TextEditingController();
   final TextEditingController _controllerPassword = TextEditingController();
-  final TextEditingController _controllerConFirmPassword =
-      TextEditingController();
+  final TextEditingController _controllerConfirmPassword =
+      TextEditingController(); // Fixed typo here
 
   final Box _boxAccounts = Hive.box("accounts");
   bool _obscurePassword = true;
@@ -109,14 +109,15 @@ class _SignupState extends State<Signup> {
                   labelText: "Password",
                   prefixIcon: const Icon(Icons.password_outlined),
                   suffixIcon: IconButton(
-                      onPressed: () {
-                        setState(() {
-                          _obscurePassword = !_obscurePassword;
-                        });
-                      },
-                      icon: _obscurePassword
-                          ? const Icon(Icons.visibility_outlined)
-                          : const Icon(Icons.visibility_off_outlined)),
+                    onPressed: () {
+                      setState(() {
+                        _obscurePassword = !_obscurePassword;
+                      });
+                    },
+                    icon: _obscurePassword
+                        ? const Icon(Icons.visibility_outlined)
+                        : const Icon(Icons.visibility_off_outlined),
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
@@ -128,7 +129,7 @@ class _SignupState extends State<Signup> {
                   if (value == null || value.isEmpty) {
                     return "Please enter password.";
                   } else if (value.length < 8) {
-                    return "Password must be at least 8 character.";
+                    return "Password must be at least 8 characters.";
                   }
                   return null;
                 },
@@ -137,7 +138,7 @@ class _SignupState extends State<Signup> {
               ),
               const SizedBox(height: 10),
               TextFormField(
-                controller: _controllerConFirmPassword,
+                controller: _controllerConfirmPassword,
                 obscureText: _obscurePassword,
                 focusNode: _focusNodeConfirmPassword,
                 keyboardType: TextInputType.visiblePassword,
@@ -145,14 +146,15 @@ class _SignupState extends State<Signup> {
                   labelText: "Confirm Password",
                   prefixIcon: const Icon(Icons.password_outlined),
                   suffixIcon: IconButton(
-                      onPressed: () {
-                        setState(() {
-                          _obscurePassword = !_obscurePassword;
-                        });
-                      },
-                      icon: _obscurePassword
-                          ? const Icon(Icons.visibility_outlined)
-                          : const Icon(Icons.visibility_off_outlined)),
+                    onPressed: () {
+                      setState(() {
+                        _obscurePassword = !_obscurePassword;
+                      });
+                    },
+                    icon: _obscurePassword
+                        ? const Icon(Icons.visibility_outlined)
+                        : const Icon(Icons.visibility_off_outlined),
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
@@ -206,39 +208,41 @@ class _SignupState extends State<Signup> {
   }
 
   void _signUp() async {
-  if (_formKey.currentState?.validate() ?? false) {
-    setState(() {
-      isSigningUp = true;
-    });
+    if (_formKey.currentState?.validate() ?? false) {
+      setState(() {
+        isSigningUp = true;
+      });
 
-    String username = _controllerUsername.text;
-    String email = _controllerEmail.text;
-    String password = _controllerPassword.text;
+      String username = _controllerUsername.text;
+      String email = _controllerEmail.text;
+      String password = _controllerPassword.text;
 
-    User? user = await _auth.signUpWithEmailAndPassword(email, password);
+      User? user = await _auth.signUpWithEmailAndPassword(email, password);
 
-    setState(() {
-      isSigningUp = false;
-    });
+      setState(() {
+        isSigningUp = false;
+      });
 
-    if (user != null) {
-      // Store the username in Firebase
-      await user.updateDisplayName(username);
-      
-      _boxAccounts.put(username, password);
+      if (user != null) {
+        // Store the username in Firebase
+        await user.updateDisplayName(username);
 
-      showToast(message: "User is successfully created");
-      
-      // Replace the current route with the home screen
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => HomeScreen()),
-      );
-    } else {
-      showToast(message: "Some error happened");
+        _boxAccounts.put(username, password);
+
+        showToast(message: "User is successfully created");
+
+        // Navigate to home screen with user ID
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => HomeScreen(userId: user.uid),
+          ),
+        );
+      } else {
+        showToast(message: "Some error happened");
+      }
     }
   }
-}
 
   @override
   void dispose() {
@@ -248,7 +252,7 @@ class _SignupState extends State<Signup> {
     _controllerUsername.dispose();
     _controllerEmail.dispose();
     _controllerPassword.dispose();
-    _controllerConFirmPassword.dispose();
+    _controllerConfirmPassword.dispose();
     super.dispose();
   }
 }

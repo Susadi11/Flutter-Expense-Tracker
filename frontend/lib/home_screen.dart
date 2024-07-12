@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
-import 'add_transaction.dart';
-import 'db_helper.dart';
-import 'statistics_screen.dart';
-import 'profile.dart';
+import 'package:expense_tracker/add_transaction.dart';
+import 'package:expense_tracker/db_helper.dart';
+import 'package:expense_tracker/statistics_screen.dart';
+import 'package:expense_tracker/profile.dart';
 
 class HomeScreen extends StatefulWidget {
+  final String userId;
+
+  HomeScreen({required this.userId});
+
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
@@ -23,8 +27,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<List<Map<String, dynamic>>> _loadTransactions() async {
-    return await DBHelper().getTransactions();
-  }
+  return await DBHelper().getTransactions(widget.userId);
+}
 
   void _refreshTransactions() {
     setState(() {
@@ -139,6 +143,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     onChanged: (newValue) {
                       setState(() {
                         _selectedCategory = newValue!;
+                        _refreshTransactions();
                       });
                     },
                     items: <String>['All', 'Income', 'Expense']
@@ -172,6 +177,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   onSelected: (bool selected) {
                     setState(() {
                       _selectedType = selected ? type : 'All';
+                      _refreshTransactions();
                     });
                   },
                 );
@@ -224,7 +230,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             );
                           },
                           onDismissed: (direction) async {
-                            await DBHelper().deleteTransaction(filteredTransactions[index]['id']);
+                            await DBHelper().deleteTransaction(filteredTransactions[index]['id'], widget.userId);
                             _refreshTransactions();
                           },
                           child: ListTile(
@@ -246,6 +252,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     builder: (context) => AddTransactionPage(
                                       onAddTransaction: _refreshTransactions,
                                       transactionToEdit: filteredTransactions[index],
+                                      userId: widget.userId,
                                     ),
                                   ),
                                 );
@@ -268,45 +275,42 @@ class _HomeScreenState extends State<HomeScreen> {
             MaterialPageRoute(
               builder: (context) => AddTransactionPage(
                 onAddTransaction: _refreshTransactions,
+                userId: widget.userId,
               ),
             ),
           );
         },
         child: Icon(Icons.add),
       ),
-      bottomNavigationBar: NavigationBar(
-        animationDuration: const Duration(seconds: 1),
-        selectedIndex: _selectedIndex,
-        onDestinationSelected: (index) {
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex,
+        onTap: (index) {
           setState(() {
             _selectedIndex = index;
           });
           if (index == 1) {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => StatisticsScreen()),
+              MaterialPageRoute(builder: (context) => StatisticsScreen(userId: widget.userId)),
             );
           } else if (index == 2) {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => Profile(username: 'Username', email: 'email@example.com')),
+              MaterialPageRoute(builder: (context) => Profile(username: 'Username', email: 'email@example.com', userId: widget.userId,)),
             );
           }
         },
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home_rounded),
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
             label: 'Home',
           ),
-          NavigationDestination(
+          BottomNavigationBarItem(
             icon: Icon(Icons.bar_chart),
-            selectedIcon: Icon(Icons.bar_chart_rounded),
             label: 'Statistics',
           ),
-          NavigationDestination(
-            icon: Icon(Icons.person_outline),
-            selectedIcon: Icon(Icons.person),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
             label: 'Profile',
           ),
         ],
@@ -314,9 +318,8 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  String _formatDate(String date) {
-    List<String> parts = date.split('T');
-    List<String> dateParts = parts[0].split('-');
-    return '${dateParts[2]}/${dateParts[1]}/${dateParts[0]}';
+  String _formatDate(String dateString) {
+    final DateTime parsedDate = DateTime.parse(dateString);
+    return '${parsedDate.day}/${parsedDate.month}/${parsedDate.year}';
   }
 }
