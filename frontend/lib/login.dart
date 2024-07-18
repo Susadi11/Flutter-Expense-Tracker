@@ -17,6 +17,7 @@ class Login extends StatefulWidget {
 class _LoginState extends State<Login> {
   final GlobalKey<FormState> _formKey = GlobalKey();
 
+  final FocusNode _focusNodeEmail = FocusNode();
   final FocusNode _focusNodePassword = FocusNode();
   final TextEditingController _controllerEmail = TextEditingController();
   final TextEditingController _controllerPassword = TextEditingController();
@@ -27,10 +28,24 @@ class _LoginState extends State<Login> {
   final FirebaseAuthService _auth = FirebaseAuthService();
   bool isLoggingIn = false;
 
+  final Color _primaryColor = Color(0xFFC2AA81);
+  final Color _lightShadeC2AA81 = Color(0xFFE5D9C3);
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNodeEmail.addListener(() {
+      setState(() {});
+    });
+    _focusNodePassword.addListener(() {
+      setState(() {});
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+      backgroundColor: _lightShadeC2AA81,
       body: Form(
         key: _formKey,
         child: SingleChildScrollView(
@@ -40,25 +55,38 @@ class _LoginState extends State<Login> {
               const SizedBox(height: 150),
               Text(
                 "Welcome back",
-                style: Theme.of(context).textTheme.headlineLarge,
+                style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                  color: _primaryColor,
+                ),
               ),
               const SizedBox(height: 10),
               Text(
                 "Login to your account",
-                style: Theme.of(context).textTheme.bodyMedium,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: _primaryColor,
+                ),
               ),
               const SizedBox(height: 60),
               TextFormField(
                 controller: _controllerEmail,
+                focusNode: _focusNodeEmail,
                 keyboardType: TextInputType.emailAddress,
+                cursorColor: Color(0xFFC2AA81),
                 decoration: InputDecoration(
                   labelText: "Email",
-                  prefixIcon: Icon(Icons.email_outlined),
+                  labelStyle: TextStyle(color: _focusNodeEmail.hasFocus ? _primaryColor : Colors.grey),
+                  prefixIcon: Icon(Icons.email_outlined, color: _primaryColor),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(color: _primaryColor),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(color: _primaryColor),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(color: _primaryColor),
                   ),
                 ),
                 onEditingComplete: () => _focusNodePassword.requestFocus(),
@@ -77,9 +105,11 @@ class _LoginState extends State<Login> {
                 focusNode: _focusNodePassword,
                 obscureText: _obscurePassword,
                 keyboardType: TextInputType.visiblePassword,
+                cursorColor: Color(0xFFC2AA81),
                 decoration: InputDecoration(
                   labelText: "Password",
-                  prefixIcon: const Icon(Icons.password_outlined),
+                  labelStyle: TextStyle(color: _focusNodePassword.hasFocus ? _primaryColor : Colors.grey),
+                  prefixIcon: Icon(Icons.password_outlined, color: _primaryColor),
                   suffixIcon: IconButton(
                     onPressed: () {
                       setState(() {
@@ -87,14 +117,20 @@ class _LoginState extends State<Login> {
                       });
                     },
                     icon: _obscurePassword
-                        ? const Icon(Icons.visibility_outlined)
-                        : const Icon(Icons.visibility_off_outlined),
+                        ? Icon(Icons.visibility_outlined, color: _primaryColor)
+                        : Icon(Icons.visibility_off_outlined, color: _primaryColor),
                   ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(color: _primaryColor),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(color: _primaryColor),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(color: _primaryColor),
                   ),
                 ),
                 validator: (String? value) {
@@ -116,29 +152,34 @@ class _LoginState extends State<Login> {
                     ),
                   );
                 },
-                child: const Text("Forgot Password?"),
+                child: Text("Forgot Password?", style: TextStyle(color: _primaryColor)),
               ),
               const SizedBox(height: 50),
               Column(
                 children: [
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
                       minimumSize: const Size.fromHeight(50),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(20),
                       ),
+                      side: BorderSide(color: _primaryColor),
                     ),
                     onPressed: () {
                       _login();
                     },
                     child: isLoggingIn
-                        ? CircularProgressIndicator(color: Colors.white)
-                        : const Text("Login"),
+                        ? CircularProgressIndicator(color: _primaryColor)
+                        : Text(
+                            "Login",
+                            style: TextStyle(color: _primaryColor),
+                          ),
                   ),
                   const SizedBox(height: 20),
                   ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).colorScheme.primary,
+                      backgroundColor: _primaryColor,
                       foregroundColor: Colors.white,
                       minimumSize: const Size.fromHeight(50),
                       shape: RoundedRectangleBorder(
@@ -171,7 +212,7 @@ class _LoginState extends State<Login> {
                             ),
                           );
                         },
-                        child: const Text("Signup"),
+                        child: Text("Signup", style: TextStyle(color: _primaryColor)),
                       ),
                     ],
                   ),
@@ -208,7 +249,8 @@ class _LoginState extends State<Login> {
           MaterialPageRoute(
             builder: (context) => Profile(
               username: user.displayName ?? 'User',
-              email: user.email ?? 'email@example.com', userId: '',
+              email: user.email ?? 'email@example.com',
+              userId: '',
             ),
           ),
         );
@@ -238,7 +280,8 @@ class _LoginState extends State<Login> {
         MaterialPageRoute(
           builder: (context) => Profile(
             username: user.displayName ?? 'User',
-            email: user.email ?? 'email@example.com', userId: user.uid,
+            email: user.email ?? 'email@example.com',
+            userId: user.uid,
           ),
         ),
       );
@@ -249,6 +292,7 @@ class _LoginState extends State<Login> {
 
   @override
   void dispose() {
+    _focusNodeEmail.dispose();
     _focusNodePassword.dispose();
     _controllerEmail.dispose();
     _controllerPassword.dispose();

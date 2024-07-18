@@ -7,13 +7,14 @@ import 'package:expense_tracker/profile.dart';
 class HomeScreen extends StatefulWidget {
   final String userId;
 
-  HomeScreen({required this.userId});
+  const HomeScreen({Key? key, required this.userId}) : super(key: key);
 
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  
   late Future<List<Map<String, dynamic>>> _transactions;
   String _selectedType = 'All';
   String _selectedSort = 'Newest First';
@@ -23,16 +24,18 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _transactions = _loadTransactions();
+    _loadTransactions();
   }
 
-  Future<List<Map<String, dynamic>>> _loadTransactions() async {
-  return await DBHelper().getTransactions(widget.userId);
-}
+  Future<void> _loadTransactions() async {
+    setState(() {
+      _transactions = DBHelper().getTransactions(widget.userId);
+    });
+  }
 
   void _refreshTransactions() {
     setState(() {
-      _transactions = _loadTransactions();
+      _loadTransactions();
     });
   }
 
@@ -174,6 +177,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 return ChoiceChip(
                   label: Text(type),
                   selected: _selectedType == type,
+                  selectedColor: Color(0xFFC2AA81), // Changed to #C2AA81
                   onSelected: (bool selected) {
                     setState(() {
                       _selectedType = selected ? type : 'All';
@@ -281,6 +285,7 @@ class _HomeScreenState extends State<HomeScreen> {
           );
         },
         child: Icon(Icons.add),
+        backgroundColor: Color(0xFFC2AA81),
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
@@ -314,6 +319,7 @@ class _HomeScreenState extends State<HomeScreen> {
             label: 'Profile',
           ),
         ],
+        selectedItemColor: Color(0xFFC2AA81), // Changed to #C2AA81
       ),
     );
   }

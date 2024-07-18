@@ -25,6 +25,8 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
     'Expense': ['Grocery', 'Financial', 'Administrative', 'Entertainment', 'Other'],
   };
 
+  final Color customColor = Color(0xFFC2AA81);
+
   @override
   void initState() {
     super.initState();
@@ -80,6 +82,16 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
       initialDate: _selectedDate ?? DateTime.now(),
       firstDate: DateTime(2000),
       lastDate: DateTime.now(),
+      builder: (BuildContext context, Widget? child) {
+        return Theme(
+          data: ThemeData.light().copyWith(
+            primaryColor: customColor,
+            colorScheme: ColorScheme.light(primary: customColor),
+            buttonTheme: ButtonThemeData(textTheme: ButtonTextTheme.primary),
+          ),
+          child: child!,
+        );
+      },
     ).then((pickedDate) {
       if (pickedDate == null) {
         return;
@@ -95,6 +107,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.transactionToEdit != null ? 'Edit Transaction' : 'Add Transaction'),
+        backgroundColor: customColor,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -109,6 +122,9 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                   decoration: InputDecoration(
                     labelText: 'Title',
                     border: OutlineInputBorder(),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: customColor),
+                    ),
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -123,6 +139,9 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                   decoration: InputDecoration(
                     labelText: 'Amount',
                     border: OutlineInputBorder(),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: customColor),
+                    ),
                   ),
                   keyboardType: TextInputType.number,
                   validator: (value) {
@@ -153,6 +172,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                             _selectedType = null;
                           });
                         },
+                        activeColor: customColor,
                       ),
                     ),
                     Expanded(
@@ -166,6 +186,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                             _selectedType = null;
                           });
                         },
+                        activeColor: customColor,
                       ),
                     ),
                   ],
@@ -188,6 +209,9 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                     decoration: InputDecoration(
                       labelText: 'Type',
                       border: OutlineInputBorder(),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: customColor),
+                      ),
                     ),
                     validator: (value) {
                       if (value == null) {
@@ -210,7 +234,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                       onPressed: _presentDatePicker,
                       child: Text(
                         'Choose Date',
-                        style: TextStyle(fontWeight: FontWeight.bold),
+                        style: TextStyle(fontWeight: FontWeight.bold, color: customColor),
                       ),
                     ),
                   ],
@@ -219,6 +243,9 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                 ElevatedButton(
                   onPressed: _submitData,
                   child: Text(widget.transactionToEdit != null ? 'Update Transaction' : 'Add Transaction'),
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: Colors.white, backgroundColor: customColor,
+                  ),
                 ),
               ],
             ),

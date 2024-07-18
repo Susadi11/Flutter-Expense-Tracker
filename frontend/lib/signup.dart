@@ -3,7 +3,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:expense_tracker/user_auth/firebase_auth_implementation/firebase_auth_services.dart';
 import 'package:expense_tracker/toast.dart';
-import 'package:expense_tracker/home_screen.dart'; // Ensure this import is correct
+import 'package:expense_tracker/home_screen.dart';
 
 class Signup extends StatefulWidget {
   const Signup({Key? key}) : super(key: key);
@@ -15,14 +15,14 @@ class Signup extends StatefulWidget {
 class _SignupState extends State<Signup> {
   final GlobalKey<FormState> _formKey = GlobalKey();
 
+  final FocusNode _focusNodeUsername = FocusNode();
   final FocusNode _focusNodeEmail = FocusNode();
   final FocusNode _focusNodePassword = FocusNode();
   final FocusNode _focusNodeConfirmPassword = FocusNode();
   final TextEditingController _controllerUsername = TextEditingController();
   final TextEditingController _controllerEmail = TextEditingController();
   final TextEditingController _controllerPassword = TextEditingController();
-  final TextEditingController _controllerConfirmPassword =
-      TextEditingController(); // Fixed typo here
+  final TextEditingController _controllerConfirmPassword = TextEditingController();
 
   final Box _boxAccounts = Hive.box("accounts");
   bool _obscurePassword = true;
@@ -30,10 +30,31 @@ class _SignupState extends State<Signup> {
 
   final FirebaseAuthService _auth = FirebaseAuthService();
 
+  // Light shade of #C2AA81
+  final Color _lightShadeC2AA81 = Color(0xFFE5D9C3);
+  final Color _mainColor = Color(0xFFC2AA81);
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNodeUsername.addListener(() {
+      setState(() {});
+    });
+    _focusNodeEmail.addListener(() {
+      setState(() {});
+    });
+    _focusNodePassword.addListener(() {
+      setState(() {});
+    });
+    _focusNodeConfirmPassword.addListener(() {
+      setState(() {});
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+      backgroundColor: _lightShadeC2AA81,
       body: Form(
         key: _formKey,
         child: SingleChildScrollView(
@@ -43,26 +64,39 @@ class _SignupState extends State<Signup> {
               const SizedBox(height: 100),
               Text(
                 "Register",
-                style: Theme.of(context).textTheme.headlineLarge,
+                style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                  color: _mainColor,
+                ),
               ),
               const SizedBox(height: 10),
               Text(
                 "Create your account",
-                style: Theme.of(context).textTheme.bodyMedium,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: _mainColor,
+                ),
               ),
               const SizedBox(height: 35),
               TextFormField(
                 controller: _controllerUsername,
+                focusNode: _focusNodeUsername,
                 keyboardType: TextInputType.name,
+                cursorColor: Color(0xFFC2AA81),
                 decoration: InputDecoration(
                   labelText: "Username",
-                  prefixIcon: const Icon(Icons.person_outline),
+                  prefixIcon: Icon(Icons.person_outline, color: _focusNodeUsername.hasFocus ? _mainColor : Colors.grey),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(color: _mainColor),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(color: _mainColor),
                   ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(color: _mainColor),
+                  ),
+                  labelStyle: TextStyle(color: _focusNodeUsername.hasFocus ? _mainColor : Colors.grey),
                 ),
                 validator: (String? value) {
                   if (value == null || value.isEmpty) {
@@ -79,15 +113,23 @@ class _SignupState extends State<Signup> {
                 controller: _controllerEmail,
                 focusNode: _focusNodeEmail,
                 keyboardType: TextInputType.emailAddress,
+                cursorColor: Color(0xFFC2AA81),
                 decoration: InputDecoration(
                   labelText: "Email",
-                  prefixIcon: const Icon(Icons.email_outlined),
+                  prefixIcon: Icon(Icons.email_outlined, color: _focusNodeEmail.hasFocus ? _mainColor : Colors.grey),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(color: _mainColor),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(color: _mainColor),
                   ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(color: _mainColor),
+                  ),
+                  labelStyle: TextStyle(color: _focusNodeEmail.hasFocus ? _mainColor : Colors.grey),
                 ),
                 validator: (String? value) {
                   if (value == null || value.isEmpty) {
@@ -105,25 +147,34 @@ class _SignupState extends State<Signup> {
                 obscureText: _obscurePassword,
                 focusNode: _focusNodePassword,
                 keyboardType: TextInputType.visiblePassword,
+                cursorColor: Color(0xFFC2AA81),
                 decoration: InputDecoration(
                   labelText: "Password",
-                  prefixIcon: const Icon(Icons.password_outlined),
+                  prefixIcon: Icon(Icons.password_outlined, color: _focusNodePassword.hasFocus ? _mainColor : Colors.grey),
                   suffixIcon: IconButton(
                     onPressed: () {
                       setState(() {
                         _obscurePassword = !_obscurePassword;
                       });
                     },
-                    icon: _obscurePassword
-                        ? const Icon(Icons.visibility_outlined)
-                        : const Icon(Icons.visibility_off_outlined),
+                    icon: Icon(
+                      _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                      color: _focusNodePassword.hasFocus ? _mainColor : Colors.grey,
+                    ),
                   ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(color: _mainColor),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(color: _mainColor),
                   ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(color: _mainColor),
+                  ),
+                  labelStyle: TextStyle(color: _focusNodePassword.hasFocus ? _mainColor : Colors.grey),
                 ),
                 validator: (String? value) {
                   if (value == null || value.isEmpty) {
@@ -133,8 +184,7 @@ class _SignupState extends State<Signup> {
                   }
                   return null;
                 },
-                onEditingComplete: () =>
-                    _focusNodeConfirmPassword.requestFocus(),
+                onEditingComplete: () => _focusNodeConfirmPassword.requestFocus(),
               ),
               const SizedBox(height: 10),
               TextFormField(
@@ -142,25 +192,34 @@ class _SignupState extends State<Signup> {
                 obscureText: _obscurePassword,
                 focusNode: _focusNodeConfirmPassword,
                 keyboardType: TextInputType.visiblePassword,
+                cursorColor: Color(0xFFC2AA81),
                 decoration: InputDecoration(
                   labelText: "Confirm Password",
-                  prefixIcon: const Icon(Icons.password_outlined),
+                  prefixIcon: Icon(Icons.password_outlined, color: _focusNodeConfirmPassword.hasFocus ? _mainColor : Colors.grey),
                   suffixIcon: IconButton(
                     onPressed: () {
                       setState(() {
                         _obscurePassword = !_obscurePassword;
                       });
                     },
-                    icon: _obscurePassword
-                        ? const Icon(Icons.visibility_outlined)
-                        : const Icon(Icons.visibility_off_outlined),
+                    icon: Icon(
+                      _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                      color: _focusNodeConfirmPassword.hasFocus ? _mainColor : Colors.grey,
+                    ),
                   ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(color: _mainColor),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(color: _mainColor),
                   ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(color: _mainColor),
+                  ),
+                  labelStyle: TextStyle(color: _focusNodeConfirmPassword.hasFocus ? _mainColor : Colors.grey),
                 ),
                 validator: (String? value) {
                   if (value == null || value.isEmpty) {
@@ -176,6 +235,7 @@ class _SignupState extends State<Signup> {
                 children: [
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
+                      backgroundColor: _mainColor,
                       minimumSize: const Size.fromHeight(50),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(20),
@@ -186,15 +246,18 @@ class _SignupState extends State<Signup> {
                     },
                     child: isSigningUp
                         ? CircularProgressIndicator(color: Colors.white)
-                        : const Text("Register"),
-                  ),
+                        : const Text(
+                               "Register",
+                               style: TextStyle(color: Colors.black), // Set text color to black
+                          ),
+                      ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       const Text("Already have an account?"),
                       TextButton(
                         onPressed: () => Navigator.pop(context),
-                        child: const Text("Login"),
+                        child: Text("Login", style: TextStyle(color: _mainColor)),
                       ),
                     ],
                   ),
@@ -206,6 +269,7 @@ class _SignupState extends State<Signup> {
       ),
     );
   }
+
 
   void _signUp() async {
     if (_formKey.currentState?.validate() ?? false) {
@@ -244,8 +308,9 @@ class _SignupState extends State<Signup> {
     }
   }
 
-  @override
+   @override
   void dispose() {
+    _focusNodeUsername.dispose();
     _focusNodeEmail.dispose();
     _focusNodePassword.dispose();
     _focusNodeConfirmPassword.dispose();
