@@ -139,39 +139,40 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
         animationDuration: const Duration(seconds: 1),
         selectedIndex: _selectedIndex,
         onDestinationSelected: (index) {
-          setState(() {
-            _selectedIndex = index;
-          });
+           setState(() {
+             _selectedIndex = index;
+           });
           if (index == 0) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => HomeScreen(userId: widget.userId)),
-            );
+             Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => HomeScreen(userId: widget.userId)),
+             );
           } else if (index == 2) {
             Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => Profile(username: 'Username', email: 'email@example.com', userId: widget.userId)),
+                context,
+                MaterialPageRoute(builder: (context) => Profile(username: 'Username', email: 'email@example.com', userId: widget.userId)),
             );
           }
         },
-        destinations: const [
+        destinations: [
           NavigationDestination(
-            icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home_rounded),
+            icon: Icon(Icons.home_outlined, color: Colors.grey),
             label: 'Home',
           ),
-          NavigationDestination(
-            icon: Icon(Icons.bar_chart),
-            selectedIcon: Icon(Icons.bar_chart_rounded),
-            label: 'Statistics',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.person_outline),
-            selectedIcon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-        ],
-      ),
+        NavigationDestination(
+      icon: Icon(Icons.bar_chart, color: Color(0xFFC2AA81)),
+      label: 'Statistics',
+    ),
+    NavigationDestination(
+      icon: Icon(Icons.person_outline, color: Colors.grey),
+      label: 'Profile',
+    ),
+  ],
+  backgroundColor: Colors.white,
+  surfaceTintColor: Colors.white,
+  indicatorColor: Colors.transparent,
+  labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+),
     );
   }
 

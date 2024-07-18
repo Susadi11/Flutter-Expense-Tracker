@@ -89,6 +89,7 @@ class _ProfileState extends State<Profile> {
                         heroTag: 'edit',
                         label: const Text("Edit"),
                         icon: const Icon(Icons.edit),
+                        backgroundColor: Color(0xFFC2AA81),
                       ),
                       const SizedBox(width: 16.0),
                       FloatingActionButton.extended(
@@ -134,23 +135,24 @@ class _ProfileState extends State<Profile> {
             );
           }
         },
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home_rounded),
-            label: 'Home',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.bar_chart),
-            selectedIcon: Icon(Icons.bar_chart_rounded),
-            label: 'Statistics',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.person_outline),
-            selectedIcon: Icon(Icons.person),
-            label: 'Profile',
-          ),
+        destinations: [
+    NavigationDestination(
+      icon: Icon(Icons.home_outlined, color: Colors.grey),
+      label: 'Home',
+    ),
+    NavigationDestination(
+      icon: Icon(Icons.bar_chart, color: Colors.grey),
+      label: 'Statistics',
+    ),
+    NavigationDestination(
+      icon: Icon(Icons.person_outline, color: Color(0xFFC2AA81)),
+      label: 'Profile',
+    ),
         ],
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.white,
+        indicatorColor: Colors.transparent,
+        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
       ),
     );
   }
@@ -336,7 +338,7 @@ class _TopPortionState extends State<_TopPortion> {
                       backgroundColor:
                           Theme.of(context).scaffoldBackgroundColor,
                       child: IconButton(
-                        icon: Icon(Icons.camera_alt),
+                        icon: Icon(Icons.camera_alt, color: Color(0xFFC2AA81)),
                         onPressed: () =>
                             _pickImage(ImageSource.gallery, 'profile'),
                       ),
