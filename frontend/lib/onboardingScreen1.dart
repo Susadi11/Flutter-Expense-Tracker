@@ -11,7 +11,12 @@ class OnboardingScreen extends StatelessWidget {
         PageViewModel(
           title: "Welcome to Pennywise",
           body: "Your personal expense tracker to manage and save money efficiently.",
-          image: Center(child: Image.asset("assets/images/onboarding1.png", height: 175.0)),
+          image: Center(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(15.0),
+              child: Image.asset("assets/images/onboarding1.png", height: 175.0),
+            ),
+          ),
           decoration: PageDecoration(
             titleTextStyle: TextStyle(fontSize: 28.0, fontWeight: FontWeight.w700),
             bodyTextStyle: TextStyle(fontSize: 19.0),
@@ -21,7 +26,12 @@ class OnboardingScreen extends StatelessWidget {
         PageViewModel(
           title: "Track Your Expenses",
           body: "Easily log and categorize your daily expenses.",
-          image: Center(child: Image.asset("assets/images/onboarding2.png", height: 175.0)),
+          image: Center(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(15.0),
+              child: Image.asset("assets/images/onboarding2.png", height: 175.0),
+            ),
+          ),
           decoration: PageDecoration(
             titleTextStyle: TextStyle(fontSize: 28.0, fontWeight: FontWeight.w700),
             bodyTextStyle: TextStyle(fontSize: 19.0),
@@ -31,7 +41,12 @@ class OnboardingScreen extends StatelessWidget {
         PageViewModel(
           title: "Sync Across Devices",
           body: "Keep your data safe and synchronized with cloud storage.",
-          image: Center(child: Image.asset("assets/images/onboarding3.png", height: 175.0)),
+          image: Center(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(15.0),
+              child: Image.asset("assets/images/onboarding3.png", height: 175.0),
+            ),
+          ),
           decoration: PageDecoration(
             titleTextStyle: TextStyle(fontSize: 28.0, fontWeight: FontWeight.w700),
             bodyTextStyle: TextStyle(fontSize: 19.0),
@@ -41,7 +56,12 @@ class OnboardingScreen extends StatelessWidget {
         PageViewModel(
           title: "Get Insights",
           body: "Analyze your spending habits and save more with detailed insights.",
-          image: Center(child: Image.asset("assets/images/onboarding4.png", height: 175.0)),
+          image: Center(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(15.0),
+              child: Image.asset("assets/images/onboarding4.png", height: 175.0),
+            ),
+          ),
           decoration: PageDecoration(
             titleTextStyle: TextStyle(fontSize: 28.0, fontWeight: FontWeight.w700),
             bodyTextStyle: TextStyle(fontSize: 19.0),

@@ -19,7 +19,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   final List<Color> expenseColors = [
     Color.fromARGB(255, 199, 129, 143),
     Color.fromARGB(255, 255, 204, 128),
-    Color.fromARGB(255, 255, 236, 179),
+    Color.fromARGB(255, 107, 94, 56),
     Color.fromARGB(255, 179, 205, 224),
     Color.fromARGB(255, 224, 187, 162),
   ];
