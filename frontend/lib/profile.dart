@@ -87,8 +87,14 @@ class _ProfileState extends State<Profile> {
                           );
                         },
                         heroTag: 'edit',
-                        label: const Text("Edit"),
-                        icon: const Icon(Icons.edit),
+                        label: const Text(
+                          "Edit",
+                          style: TextStyle(color: Colors.black), // Set text color to black
+                        ),
+                        icon: const Icon(
+                          Icons.edit,
+                          color: Colors.black, // Set icon color to black
+                        ),
                         backgroundColor: Color(0xFFC2AA81),
                       ),
                       const SizedBox(width: 16.0),
@@ -104,8 +110,14 @@ class _ProfileState extends State<Profile> {
                         },
                         heroTag: 'signout',
                         backgroundColor: Colors.red,
-                        label: const Text("Sign Out"),
-                        icon: const Icon(Icons.exit_to_app),
+                        label: const Text(
+                          "Sign Out",
+                          style: TextStyle(color: Colors.black), // Set text color to black
+                        ),
+                        icon: const Icon(
+                          Icons.exit_to_app,
+                          color: Colors.black, // Set icon color to black
+                        ),
                       ),
                     ],
                   ),

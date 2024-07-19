@@ -150,9 +150,14 @@ class _EditProfileState extends State<EditProfile> {
               const SizedBox(height: 20),
               TextFormField(
                 controller: _passwordController,
+                cursorColor: Color(0xFFC2AA81),
                 decoration: const InputDecoration(
                   labelText: 'Current Password',
                   border: OutlineInputBorder(),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Color(0xFFC2AA81)),
+                  ),
+                  floatingLabelStyle: TextStyle(color: Color(0xFFC2AA81)),
                 ),
                 obscureText: true,
                 validator: (value) {
@@ -165,9 +170,14 @@ class _EditProfileState extends State<EditProfile> {
               const SizedBox(height: 20),
               TextFormField(
                 controller: _newPasswordController,
+                cursorColor: Color(0xFFC2AA81),
                 decoration: const InputDecoration(
                   labelText: 'New Password',
                   border: OutlineInputBorder(),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Color(0xFFC2AA81)),
+                  ),
+                  floatingLabelStyle: TextStyle(color: Color(0xFFC2AA81)),
                 ),
                 obscureText: true,
                 validator: (value) {
@@ -180,9 +190,14 @@ class _EditProfileState extends State<EditProfile> {
               const SizedBox(height: 20),
               TextFormField(
                 controller: _confirmNewPasswordController,
+                cursorColor: Color(0xFFC2AA81),
                 decoration: const InputDecoration(
                   labelText: 'Confirm New Password',
                   border: OutlineInputBorder(),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Color(0xFFC2AA81)),
+                  ),
+                  floatingLabelStyle: TextStyle(color: Color(0xFFC2AA81)),
                 ),
                 obscureText: true,
                 validator: (value) {
@@ -198,6 +213,7 @@ class _EditProfileState extends State<EditProfile> {
                   onPressed: _changePassword,
                   style: ElevatedButton.styleFrom(
                     padding: EdgeInsets.symmetric(horizontal: 40, vertical: 20),
+                    foregroundColor: Colors.black, // Set text color to black
                   ),
                   child: const Text('Change Password'),
                 ),
@@ -209,6 +225,7 @@ class _EditProfileState extends State<EditProfile> {
                   style: ElevatedButton.styleFrom(
                     padding: EdgeInsets.symmetric(horizontal: 40, vertical: 20),
                     backgroundColor: Colors.red,
+                    foregroundColor: Colors.black, // Set text color to black
                   ),
                   child: const Text('Delete Account'),
                 ),
