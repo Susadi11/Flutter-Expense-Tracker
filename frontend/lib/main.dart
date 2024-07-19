@@ -72,9 +72,6 @@ class _FinanceTrackerAppState extends State<FinanceTrackerApp> {
   Future<bool> _checkFirstTimeUser() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     bool isFirstTimeUser = prefs.getBool('isFirstTimeUser') ?? true;
-    if (isFirstTimeUser) {
-      await prefs.setBool('isFirstTimeUser', false);
-    }
     return isFirstTimeUser;
   }
 }
@@ -150,7 +147,7 @@ class _AuthCheckScreenState extends State<AuthCheckScreen> {
 }
 
 class HomePage extends StatefulWidget {
-  final String userId; // Declare userId as a parameter
+  final String userId;
 
   const HomePage({Key? key, required this.userId}) : super(key: key);
 
@@ -160,8 +157,8 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
-  String username = "Username"; // Example value, replace with actual data
-  String email = "email@example.com"; // Example value, replace with actual data
+  String username = "Username";
+  String email = "email@example.com";
 
   late List<Widget> _widgetOptions;
 
@@ -169,7 +166,7 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     _widgetOptions = [
-      HomeScreen(userId: widget.userId), // Pass userId to HomeScreen
+      HomeScreen(userId: widget.userId),
       StatisticsScreen(userId: widget.userId),
       Profile(userId: widget.userId),
     ];
@@ -212,8 +209,8 @@ class _HomePageState extends State<HomePage> {
           Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) => AddTransactionPage(
-                onAddTransaction: () {}, // Provide a default no-op callback
-                userId: widget.userId, // Pass userId to AddTransactionPage
+                onAddTransaction: () {},
+                userId: widget.userId,
               ),
             ),
           );

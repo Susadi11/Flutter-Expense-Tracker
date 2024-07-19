@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:introduction_screen/introduction_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'login.dart';
+import 'main.dart';
 
 class OnboardingScreen extends StatelessWidget {
   @override
@@ -89,9 +89,9 @@ class OnboardingScreen extends StatelessWidget {
 
   void _finishOnboarding(BuildContext context) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('onboardingComplete', true);
+    await prefs.setBool('isFirstTimeUser', false);
     Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => Login()),
+      MaterialPageRoute(builder: (_) => AuthCheckScreen()),
     );
   }
 }

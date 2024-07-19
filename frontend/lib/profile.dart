@@ -9,7 +9,6 @@ import 'dart:io';
 import 'login.dart';
 import 'settings_screen.dart';
 import 'edit_profile.dart';
-import 'home_screen.dart';
 import 'statistics_screen.dart';
 
 class Profile extends StatefulWidget {
