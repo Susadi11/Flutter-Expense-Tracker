@@ -312,7 +312,7 @@ class _TopPortionState extends State<_TopPortion> {
                 image: _backgroundImage != null
                     ? FileImage(_backgroundImage!)
                     : const NetworkImage(
-                        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQMrYE5dTA2hr1JGLuYZQv_L218986OZ0ogjDPSdIolTV1_pmLVtDRjd1gcTu4cJ9b2CV8&usqp=CAU',
+                        'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png',
                       ) as ImageProvider<Object>,
               ),
             ),
@@ -337,7 +337,7 @@ class _TopPortionState extends State<_TopPortion> {
                         image: _profileImage != null
                             ? FileImage(_profileImage!)
                             : const NetworkImage(
-                                'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQMrYE5dTA2hr1JGLuYZQv_L218986OZ0ogjDPSdIolTV1_pmLVtDRjd1gcTu4cJ9b2CV8&usqp=CAU',
+                                'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png',
                               ) as ImageProvider<Object>,
                       ),
                     ),
