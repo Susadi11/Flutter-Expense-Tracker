@@ -20,6 +20,7 @@ void main() async {
   await Hive.initFlutter();
   await Hive.openBox('login');
   await Hive.openBox('accounts');
+  await Hive.openBox('imagePaths');
 
   runApp(
     ChangeNotifierProvider(
@@ -48,29 +49,33 @@ class _FinanceTrackerAppState extends State<FinanceTrackerApp> {
                 : Brightness.light,
           ),
           home: FutureBuilder<bool>(
-            future: _checkOnboardingComplete(),
+            future: _checkFirstTimeUser(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return Scaffold(
                   body: Center(child: CircularProgressIndicator()),
                 );
               } else {
-                return snapshot.data == true ? AuthCheckScreen() : OnboardingScreen();
+                return snapshot.data == true ? OnboardingScreen() : AuthCheckScreen();
               }
             },
           ),
           routes: {
-             '/login': (context) => Login(),
-             '/home': (context) => HomeWrapper(),
-},
+            '/login': (context) => Login(),
+            '/home': (context) => HomeWrapper(),
+          },
         );
       },
     );
   }
 
-  Future<bool> _checkOnboardingComplete() async {
+  Future<bool> _checkFirstTimeUser() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getBool('onboardingComplete') ?? false;
+    bool isFirstTimeUser = prefs.getBool('isFirstTimeUser') ?? true;
+    if (isFirstTimeUser) {
+      await prefs.setBool('isFirstTimeUser', false);
+    }
+    return isFirstTimeUser;
   }
 }
 
@@ -124,7 +129,7 @@ class _AuthCheckScreenState extends State<AuthCheckScreen> {
 
   void _navigateToHome(String userId) {
     Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (context) => HomePage(userId: userId)), // Pass userId to HomePage
+      MaterialPageRoute(builder: (context) => HomePage(userId: userId)),
     );
   }
 
@@ -166,7 +171,7 @@ class _HomePageState extends State<HomePage> {
     _widgetOptions = [
       HomeScreen(userId: widget.userId), // Pass userId to HomeScreen
       StatisticsScreen(userId: widget.userId),
-      Profile(username: username, email: email, userId: widget.userId),
+      Profile(userId: widget.userId),
     ];
   }
 

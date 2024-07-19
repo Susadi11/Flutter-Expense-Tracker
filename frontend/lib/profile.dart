@@ -1,7 +1,9 @@
+import 'package:expense_tracker/main.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:hive/hive.dart';
 import 'dart:io';
 
 import 'login.dart';
@@ -11,15 +13,11 @@ import 'home_screen.dart';
 import 'statistics_screen.dart';
 
 class Profile extends StatefulWidget {
-  final String username;
-  final String email;
-  final String userId;  // Add this line
+  final String userId;
 
   const Profile({
     Key? key,
-    required this.username,
-    required this.email,
-    required this.userId,  // Add this line
+    required this.userId,
   }) : super(key: key);
 
   @override
@@ -27,7 +25,23 @@ class Profile extends StatefulWidget {
 }
 
 class _ProfileState extends State<Profile> {
-  int _selectedIndex = 2; // Set to 2 for Profile
+  int _selectedIndex = 2;
+  String username = '';
+  String email = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      username = prefs.getString('userName') ?? 'Username';
+      email = prefs.getString('userEmail') ?? 'email@example.com';
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +64,7 @@ class _ProfileState extends State<Profile> {
         children: [
           Expanded(
             flex: 2,
-            child: _TopPortion(email: widget.email),
+            child: _TopPortion(email: email),
           ),
           Expanded(
             flex: 3,
@@ -59,7 +73,7 @@ class _ProfileState extends State<Profile> {
               child: Column(
                 children: [
                   Text(
-                    widget.username,
+                    username,
                     style: Theme.of(context)
                         .textTheme
                         .titleLarge!
@@ -67,7 +81,7 @@ class _ProfileState extends State<Profile> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    widget.email,
+                    email,
                     style: Theme.of(context).textTheme.bodyMedium!,
                   ),
                   const SizedBox(height: 16),
@@ -80,8 +94,8 @@ class _ProfileState extends State<Profile> {
                             context,
                             MaterialPageRoute(
                               builder: (context) => EditProfile(
-                                username: widget.username,
-                                email: widget.email,
+                                username: username,
+                                email: email,
                               ),
                             ),
                           );
@@ -89,39 +103,30 @@ class _ProfileState extends State<Profile> {
                         heroTag: 'edit',
                         label: const Text(
                           "Edit",
-                          style: TextStyle(color: Colors.black), // Set text color to black
+                          style: TextStyle(color: Colors.black),
                         ),
                         icon: const Icon(
                           Icons.edit,
-                          color: Colors.black, // Set icon color to black
+                          color: Colors.black,
                         ),
                         backgroundColor: Color(0xFFC2AA81),
                       ),
                       const SizedBox(width: 16.0),
                       FloatingActionButton.extended(
-                        onPressed: () async {
-                          await FirebaseAuth.instance.signOut();
-                          Navigator.pushAndRemoveUntil(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const Login()),
-                            (Route<dynamic> route) => false,
-                          );
-                        },
+                        onPressed: _signOut,
                         heroTag: 'signout',
                         backgroundColor: Colors.red,
                         label: const Text(
                           "Sign Out",
-                          style: TextStyle(color: Colors.black), // Set text color to black
+                          style: TextStyle(color: Colors.black),
                         ),
                         icon: const Icon(
-                          Icons.exit_to_app,
-                          color: Colors.black, // Set icon color to black
+                          Icons.logout,
+                          color: Colors.black,
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
                 ],
               ),
             ),
@@ -131,41 +136,62 @@ class _ProfileState extends State<Profile> {
       bottomNavigationBar: NavigationBar(
         animationDuration: const Duration(seconds: 1),
         selectedIndex: _selectedIndex,
-        onDestinationSelected: (index) {
-          setState(() {
-            _selectedIndex = index;
-          });
-          if (index == 0) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => HomeScreen(userId: widget.userId)),  // Update this line
-            );
-          } else if (index == 1) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => StatisticsScreen(userId: widget.userId)),
-            );
+        onDestinationSelected: (int index) {
+          if (index != _selectedIndex) {
+            setState(() {
+              _selectedIndex = index;
+            });
+            switch (index) {
+              case 0:
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => HomePage(userId: widget.userId)),
+                );
+                break;
+              case 1:
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) =>
+                          StatisticsScreen(userId: widget.userId)),
+                );
+                break;
+              case 2:
+                // Already on Profile screen, no need to navigate
+                break;
+            }
           }
         },
-        destinations: [
-    NavigationDestination(
-      icon: Icon(Icons.home_outlined, color: Colors.grey),
-      label: 'Home',
-    ),
-    NavigationDestination(
-      icon: Icon(Icons.bar_chart, color: Colors.grey),
-      label: 'Statistics',
-    ),
-    NavigationDestination(
-      icon: Icon(Icons.person_outline, color: Color(0xFFC2AA81)),
-      label: 'Profile',
-    ),
+        destinations: const [
+          NavigationDestination(
+            icon: Icon(Icons.home_outlined),
+            selectedIcon: Icon(Icons.home_rounded),
+            label: 'Home',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.bar_chart),
+            selectedIcon: Icon(Icons.bar_chart_rounded),
+            label: 'Statistics',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.person_outline),
+            selectedIcon: Icon(Icons.person),
+            label: 'Profile',
+          ),
         ],
-        backgroundColor: Colors.white,
-        surfaceTintColor: Colors.white,
-        indicatorColor: Colors.transparent,
-        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
       ),
+    );
+  }
+
+  Future<void> _signOut() async {
+    await FirebaseAuth.instance.signOut();
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
+
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (context) => Login()),
+      (Route<dynamic> route) => false,
     );
   }
 }
@@ -173,7 +199,7 @@ class _ProfileState extends State<Profile> {
 class _TopPortion extends StatefulWidget {
   final String email;
 
-  const _TopPortion({Key? key, required this.email}) : super(key: key);
+  const _TopPortion({required this.email});
 
   @override
   _TopPortionState createState() => _TopPortionState();
@@ -182,6 +208,7 @@ class _TopPortion extends StatefulWidget {
 class _TopPortionState extends State<_TopPortion> {
   File? _backgroundImage;
   File? _profileImage;
+  final Box _imagePathBox = Hive.box('imagePaths'); // New Hive box
 
   @override
   void initState() {
@@ -189,12 +216,17 @@ class _TopPortionState extends State<_TopPortion> {
     _loadImages();
   }
 
+  @override
+  void didUpdateWidget(covariant _TopPortion oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.email != widget.email) {
+      _loadImages();
+    }
+  }
+
   Future<void> _loadImages() async {
-    final prefs = await SharedPreferences.getInstance();
-    final backgroundImagePath =
-        prefs.getString('${widget.email}_backgroundImagePath');
-    final profileImagePath =
-        prefs.getString('${widget.email}_profileImagePath');
+    final backgroundImagePath = _imagePathBox.get('${widget.email}_backgroundImagePath');
+    final profileImagePath = _imagePathBox.get('${widget.email}_profileImagePath');
 
     setState(() {
       if (backgroundImagePath != null) {
@@ -209,15 +241,13 @@ class _TopPortionState extends State<_TopPortion> {
   Future<void> _pickImage(ImageSource source, String imageType) async {
     final pickedFile = await ImagePicker().pickImage(source: source);
     if (pickedFile != null) {
-      final prefs = await SharedPreferences.getInstance();
       setState(() {
         if (imageType == 'background') {
           _backgroundImage = File(pickedFile.path);
-          prefs.setString(
-              '${widget.email}_backgroundImagePath', pickedFile.path);
+          _imagePathBox.put('${widget.email}_backgroundImagePath', pickedFile.path);
         } else {
           _profileImage = File(pickedFile.path);
-          prefs.setString('${widget.email}_profileImagePath', pickedFile.path);
+          _imagePathBox.put('${widget.email}_profileImagePath', pickedFile.path);
         }
       });
     }
@@ -266,14 +296,10 @@ class _TopPortionState extends State<_TopPortion> {
                       setState(() {
                         if (imageType == 'background') {
                           _backgroundImage = null;
-                          SharedPreferences.getInstance().then((prefs) {
-                            prefs.remove('${widget.email}_backgroundImagePath');
-                          });
+                          _imagePathBox.delete('${widget.email}_backgroundImagePath');
                         } else {
                           _profileImage = null;
-                          SharedPreferences.getInstance().then((prefs) {
-                            prefs.remove('${widget.email}_profileImagePath');
-                          });
+                          _imagePathBox.delete('${widget.email}_profileImagePath');
                         }
                       });
                       Navigator.of(context).pop();

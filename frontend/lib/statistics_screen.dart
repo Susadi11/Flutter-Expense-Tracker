@@ -150,7 +150,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           } else if (index == 2) {
             Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (context) => Profile(username: 'Username', email: 'email@example.com', userId: widget.userId)),
+                MaterialPageRoute(builder: (context) => Profile(userId: widget.userId)),
             );
           }
         },

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:expense_tracker/user_auth/firebase_auth_implementation/firebase_auth_services.dart';
 import 'signup.dart';
 import 'profile.dart';
@@ -30,16 +31,35 @@ class _LoginState extends State<Login> {
 
   final Color _primaryColor = Color(0xFFC2AA81);
   final Color _lightShadeC2AA81 = Color(0xFFE5D9C3);
+  final Color _accentColor = Color.fromARGB(255, 0, 0, 0);
 
   @override
   void initState() {
     super.initState();
+    _checkLoginStatus();
     _focusNodeEmail.addListener(() {
       setState(() {});
     });
     _focusNodePassword.addListener(() {
       setState(() {});
     });
+  }
+
+  void _checkLoginStatus() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+    if (isLoggedIn) {
+      String? email = prefs.getString('userEmail');
+      String? displayName = prefs.getString('userName');
+      String? userId = prefs.getString('userId');
+      
+      if (email != null && displayName != null && userId != null) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => Profile(userId: userId)),
+        );
+      }
+    }
   }
 
   @override
@@ -56,14 +76,14 @@ class _LoginState extends State<Login> {
               Text(
                 "Welcome back",
                 style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                  color: _primaryColor,
+                  color: _accentColor,
                 ),
               ),
               const SizedBox(height: 10),
               Text(
                 "Login to your account",
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: _primaryColor,
+                  color: _accentColor,
                 ),
               ),
               const SizedBox(height: 60),
@@ -152,7 +172,7 @@ class _LoginState extends State<Login> {
                     ),
                   );
                 },
-                child: Text("Forgot Password?", style: TextStyle(color: _primaryColor)),
+                child: Text("Forgot Password?", style: TextStyle(color: _accentColor)),
               ),
               const SizedBox(height: 50),
               Column(
@@ -241,18 +261,15 @@ class _LoginState extends State<Login> {
       });
 
       if (user != null) {
-        _boxLogin.put("loginStatus", true);
-        _boxLogin.put("userEmail", user.email);
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setBool('isLoggedIn', true);
+        await prefs.setString('userEmail', user.email ?? '');
+        await prefs.setString('userName', user.displayName ?? 'User');
+        await prefs.setString('userId', user.uid);
 
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(
-            builder: (context) => Profile(
-              username: user.displayName ?? 'User',
-              email: user.email ?? 'email@example.com',
-              userId: '',
-            ),
-          ),
+          MaterialPageRoute(builder: (context) => Profile(userId: user.uid)),
         );
       } else {
         // The toast message will be shown by the FirebaseAuthService
@@ -272,18 +289,15 @@ class _LoginState extends State<Login> {
     });
 
     if (user != null) {
-      _boxLogin.put("loginStatus", true);
-      _boxLogin.put("userEmail", user.email);
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('isLoggedIn', true);
+      await prefs.setString('userEmail', user.email ?? '');
+      await prefs.setString('userName', user.displayName ?? 'User');
+      await prefs.setString('userId', user.uid);
 
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(
-          builder: (context) => Profile(
-            username: user.displayName ?? 'User',
-            email: user.email ?? 'email@example.com',
-            userId: user.uid,
-          ),
-        ),
+        MaterialPageRoute(builder: (context) => Profile(userId: user.uid)),
       );
     } else {
       // The toast message will be shown by the FirebaseAuthService

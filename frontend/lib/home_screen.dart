@@ -301,7 +301,7 @@ class _HomeScreenState extends State<HomeScreen> {
           } else if (index == 2) {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => Profile(username: 'Username', email: 'email@example.com', userId: widget.userId,)),
+              MaterialPageRoute(builder: (context) => Profile(userId: widget.userId)),
             );
           }
         },
