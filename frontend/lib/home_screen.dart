@@ -14,7 +14,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  
   late Future<List<Map<String, dynamic>>> _transactions;
   String _selectedType = 'All';
   String _selectedSort = 'Newest First';
@@ -177,7 +176,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 return ChoiceChip(
                   label: Text(type),
                   selected: _selectedType == type,
-                  selectedColor: Color(0xFFC2AA81), // Changed to #C2AA81
+                  selectedColor: Color(0xFFC2AA81),
                   onSelected: (bool selected) {
                     setState(() {
                       _selectedType = selected ? type : 'All';
@@ -287,9 +286,10 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Icon(Icons.add),
         backgroundColor: Color(0xFFC2AA81),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: (index) {
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _selectedIndex,
+        onDestinationSelected: (index) {
           setState(() {
             _selectedIndex = index;
           });
@@ -305,21 +305,23 @@ class _HomeScreenState extends State<HomeScreen> {
             );
           }
         },
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
+        destinations: const [
+          NavigationDestination(
+            icon: Icon(Icons.home_outlined),
+            selectedIcon: Icon(Icons.home),
             label: 'Home',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.bar_chart),
+          NavigationDestination(
+            icon: Icon(Icons.bar_chart_outlined),
+            selectedIcon: Icon(Icons.bar_chart),
             label: 'Statistics',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
+          NavigationDestination(
+            icon: Icon(Icons.person_outline),
+            selectedIcon: Icon(Icons.person),
             label: 'Profile',
           ),
         ],
-        selectedItemColor: Color(0xFFC2AA81), // Changed to #C2AA81
       ),
     );
   }

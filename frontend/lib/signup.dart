@@ -33,6 +33,7 @@ class _SignupState extends State<Signup> {
   // Light shade of #C2AA81
   final Color _lightShadeC2AA81 = Color(0xFFE5D9C3);
   final Color _mainColor = Color(0xFFC2AA81);
+  final Color _accentColor = Color.fromARGB(255, 0, 0, 0);
 
   @override
   void initState() {
@@ -65,14 +66,15 @@ class _SignupState extends State<Signup> {
               Text(
                 "Register",
                 style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                  color: _mainColor,
+                  color: _accentColor,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
               const SizedBox(height: 10),
               Text(
                 "Create your account",
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: _mainColor,
+                  color: _accentColor,
                 ),
               ),
               const SizedBox(height: 35),
@@ -247,10 +249,14 @@ class _SignupState extends State<Signup> {
                     child: isSigningUp
                         ? CircularProgressIndicator(color: Colors.white)
                         : const Text(
-                               "Register",
-                               style: TextStyle(color: Colors.black), // Set text color to black
+                            "Register",
+                            style: TextStyle(
+                              color: Colors.black, // Set text color to black
+                              fontSize: 18, // Increase font size
+                              fontWeight: FontWeight.bold, // Make text bold
+                            ),
                           ),
-                      ),
+                  ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -269,7 +275,6 @@ class _SignupState extends State<Signup> {
       ),
     );
   }
-
 
   void _signUp() async {
     if (_formKey.currentState?.validate() ?? false) {
@@ -308,7 +313,7 @@ class _SignupState extends State<Signup> {
     }
   }
 
-   @override
+  @override
   void dispose() {
     _focusNodeUsername.dispose();
     _focusNodeEmail.dispose();

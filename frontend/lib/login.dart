@@ -77,6 +77,7 @@ class _LoginState extends State<Login> {
                 "Welcome back",
                 style: Theme.of(context).textTheme.headlineLarge?.copyWith(
                   color: _accentColor,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
               const SizedBox(height: 10),
@@ -193,7 +194,11 @@ class _LoginState extends State<Login> {
                         ? CircularProgressIndicator(color: _primaryColor)
                         : Text(
                             "Login",
-                            style: TextStyle(color: _primaryColor),
+                            style: TextStyle(
+                              color: _accentColor,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
                           ),
                   ),
                   const SizedBox(height: 20),
@@ -213,7 +218,13 @@ class _LoginState extends State<Login> {
                       FontAwesomeIcons.google,
                       color: Colors.grey,
                     ),
-                    label: const Text("Signup with Google"),
+                    label: const Text(
+                      "Signup with Google",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 10),
                   Row(
