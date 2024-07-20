@@ -3,7 +3,6 @@ import 'db_helper.dart';
 import 'pie_chart.dart';
 import 'home_screen.dart';
 import 'profile.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 class StatisticsScreen extends StatefulWidget {
   final String userId;
@@ -20,7 +19,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   final List<Color> expenseColors = [
     Color.fromARGB(255, 199, 129, 143),
     Color.fromARGB(255, 255, 204, 128),
-    Color.fromARGB(255, 255, 236, 179),
+    Color.fromARGB(255, 107, 94, 56),
     Color.fromARGB(255, 179, 205, 224),
     Color.fromARGB(255, 224, 187, 162),
   ];
@@ -136,6 +135,43 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           },
         ),
       ),
+      bottomNavigationBar: NavigationBar(
+        animationDuration: const Duration(seconds: 1),
+        selectedIndex: _selectedIndex,
+        onDestinationSelected: (index) {
+           setState(() {
+             _selectedIndex = index;
+           });
+          if (index == 0) {
+             Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => HomeScreen(userId: widget.userId)),
+             );
+          } else if (index == 2) {
+            Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => Profile(userId: widget.userId)),
+            );
+          }
+        },
+        destinations: [
+          NavigationDestination(
+            icon: Icon(Icons.home_outlined, color: Colors.grey),
+            label: 'Home',
+          ),
+        NavigationDestination(
+      icon: Icon(Icons.bar_chart, color: Color(0xFFC2AA81)),
+      label: 'Statistics',
+    ),
+    NavigationDestination(
+      icon: Icon(Icons.person_outline, color: Colors.grey),
+      label: 'Profile',
+    ),
+  ],
+  surfaceTintColor: Colors.white,
+  indicatorColor: Colors.transparent,
+  labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+),
     );
   }
 

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:expense_tracker/add_transaction.dart';
 import 'package:expense_tracker/db_helper.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:expense_tracker/statistics_screen.dart';
+import 'package:expense_tracker/profile.dart';
 
 class HomeScreen extends StatefulWidget {
   final String userId;
@@ -17,6 +18,7 @@ class _HomeScreenState extends State<HomeScreen> {
   String _selectedType = 'All';
   String _selectedSort = 'Newest First';
   String _selectedCategory = 'All';
+  int _selectedIndex = 0;
 
   @override
   void initState() {
@@ -283,6 +285,46 @@ class _HomeScreenState extends State<HomeScreen> {
         },
         child: Icon(Icons.add),
         backgroundColor: Color(0xFFC2AA81),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _selectedIndex,
+        onDestinationSelected: (index) {
+          setState(() {
+            _selectedIndex = index;
+          });
+          if (index == 1) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => StatisticsScreen(userId: widget.userId)),
+            );
+          } else if (index == 2) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => Profile(userId: widget.userId)),
+            );
+          }
+        },
+        destinations: const [
+          NavigationDestination(
+            icon: Icon(Icons.home_outlined),
+            selectedIcon: Icon(Icons.home, color: Color(0xFFC2AA81)),
+            label: 'Home',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.bar_chart_outlined),
+            selectedIcon: Icon(Icons.bar_chart),
+            label: 'Statistics',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.person_outline),
+            selectedIcon: Icon(Icons.person),
+            label: 'Profile',
+          ),
+        ],
+        surfaceTintColor: Colors.white,
+        indicatorColor: Colors.transparent,
+
       ),
     );
   }

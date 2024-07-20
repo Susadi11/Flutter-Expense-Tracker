@@ -30,6 +30,7 @@ class _LoginState extends State<Login> {
 
   final Color _primaryColor = Color(0xFFC2AA81);
   final Color _lightShadeC2AA81 = Color(0xFFE5D9C3);
+  final Color _accentColor = Color.fromARGB(255, 0, 0, 0);
 
   @override
   void initState() {
@@ -56,14 +57,15 @@ class _LoginState extends State<Login> {
               Text(
                 "Welcome back",
                 style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                  color: _primaryColor,
+                  color: _accentColor,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
               const SizedBox(height: 10),
               Text(
                 "Login to your account",
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: _primaryColor,
+                  color: _accentColor,
                 ),
               ),
               const SizedBox(height: 60),
@@ -152,7 +154,7 @@ class _LoginState extends State<Login> {
                     ),
                   );
                 },
-                child: Text("Forgot Password?", style: TextStyle(color: _primaryColor)),
+                child: Text("Forgot Password?", style: TextStyle(color: _accentColor)),
               ),
               const SizedBox(height: 50),
               Column(
@@ -173,7 +175,7 @@ class _LoginState extends State<Login> {
                         ? CircularProgressIndicator(color: _primaryColor)
                         : Text(
                             "Login",
-                            style: TextStyle(color: _primaryColor),
+                            style: TextStyle(color: _accentColor, fontSize: 16, fontWeight: FontWeight.bold),
                           ),
                   ),
                   const SizedBox(height: 20),
@@ -193,7 +195,10 @@ class _LoginState extends State<Login> {
                       FontAwesomeIcons.google,
                       color: Colors.grey,
                     ),
-                    label: const Text("Signup with Google"),
+                    label: const Text(
+                      "Signup with Google",
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
                   ),
                   const SizedBox(height: 10),
                   Row(
@@ -248,9 +253,7 @@ class _LoginState extends State<Login> {
           context,
           MaterialPageRoute(
             builder: (context) => Profile(
-              username: user.displayName ?? 'User',
-              email: user.email ?? 'email@example.com',
-              userId: '',
+              userId: user.uid,
             ),
           ),
         );
@@ -279,8 +282,6 @@ class _LoginState extends State<Login> {
         context,
         MaterialPageRoute(
           builder: (context) => Profile(
-            username: user.displayName ?? 'User',
-            email: user.email ?? 'email@example.com',
             userId: user.uid,
           ),
         ),
