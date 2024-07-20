@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:local_auth/local_auth.dart';
 
 import 'theme_notifier.dart';
@@ -12,7 +13,6 @@ import 'statistics_screen.dart';
 import 'profile.dart';
 import 'onboardingScreen1.dart';
 import 'login.dart';
-import 'home_wrapper.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -62,7 +62,7 @@ class _FinanceTrackerAppState extends State<FinanceTrackerApp> {
           ),
           routes: {
             '/login': (context) => Login(),
-            '/home': (context) => HomeWrapper(),
+            '/home': (context) => AuthCheckScreen(),
           },
         );
       },
@@ -83,7 +83,7 @@ class AuthCheckScreen extends StatefulWidget {
 
 class _AuthCheckScreenState extends State<AuthCheckScreen> {
   final LocalAuthentication _localAuthentication = LocalAuthentication();
-  final Box _boxLogin = Hive.box("login");
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
   @override
   void initState() {
@@ -92,35 +92,11 @@ class _AuthCheckScreenState extends State<AuthCheckScreen> {
   }
 
   Future<void> _checkAuth() async {
-    bool isAuthenticated = await _authenticate();
-    if (isAuthenticated) {
-      String? userId = _boxLogin.get("userId");
-      if (userId != null) {
-        _navigateToHome(userId);
-      } else {
-        _navigateToLogin();
-      }
+    User? user = _auth.currentUser;
+    if (user != null) {
+      _navigateToHome(user.uid);
     } else {
       _navigateToLogin();
-    }
-  }
-
-  Future<bool> _authenticate() async {
-    try {
-      bool canCheckBiometrics = await _localAuthentication.canCheckBiometrics;
-      if (!canCheckBiometrics) {
-        return false;
-      }
-      bool isAuthenticated = await _localAuthentication.authenticate(
-        localizedReason: 'Please authenticate to access the app',
-        options: const AuthenticationOptions(
-          biometricOnly: true,
-          stickyAuth: true,
-        ),
-      );
-      return isAuthenticated;
-    } catch (e) {
-      return false;
     }
   }
 
@@ -157,9 +133,6 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
-  String username = "Username";
-  String email = "email@example.com";
-
   late List<Widget> _widgetOptions;
 
   @override
@@ -189,22 +162,25 @@ class _HomePageState extends State<HomePage> {
         destinations: const [
           NavigationDestination(
             icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home_rounded),
+            selectedIcon: Icon(Icons.home_rounded, color: Color(0xFFC2AA81)),
             label: 'Home',
           ),
           NavigationDestination(
             icon: Icon(Icons.bar_chart),
-            selectedIcon: Icon(Icons.bar_chart_rounded),
+            selectedIcon: Icon(Icons.bar_chart_rounded, color: Color(0xFFC2AA81)),
             label: 'Statistics',
           ),
           NavigationDestination(
             icon: Icon(Icons.person_outline),
-            selectedIcon: Icon(Icons.person),
+            selectedIcon: Icon(Icons.person, color: Color(0xFFC2AA81)),
             label: 'Profile',
           ),
         ],
+  surfaceTintColor: Colors.white,
+  indicatorColor: Colors.transparent,
       ),
       floatingActionButton: FloatingActionButton(
+        backgroundColor: Color(0xFFC2AA81),
         onPressed: () {
           Navigator.of(context).push(
             MaterialPageRoute(
