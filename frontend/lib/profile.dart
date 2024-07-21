@@ -201,15 +201,16 @@ class _ProfileState extends State<Profile> {
   }
 
   Future<void> _signOut() async {
-    await FirebaseAuth.instance.signOut();
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.clear();
-
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (context) => Login()),
-      (Route<dynamic> route) => false,
-    );
-  }
+  await FirebaseAuth.instance.signOut();
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  await prefs.setBool('isLoggedIn', false);
+  await prefs.remove('userEmail');
+  
+  Navigator.pushReplacement(
+    context,
+    MaterialPageRoute(builder: (context) => Login()),
+  );
+}
 }
 
 class _TopPortion extends StatefulWidget {
