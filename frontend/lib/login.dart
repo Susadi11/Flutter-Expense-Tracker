@@ -42,6 +42,26 @@ class _LoginState extends State<Login> {
     _focusNodePassword.addListener(() {
       setState(() {});
     });
+    
+    // Check login status
+    checkLoginStatus().then((loggedIn) {
+      if (loggedIn) {
+        // If logged in, navigate to Profile page
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => Profile(
+              userId: FirebaseAuth.instance.currentUser?.uid ?? '',
+            ),
+          ),
+        );
+      }
+    });
+  }
+
+  Future<bool> checkLoginStatus() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getBool('isLoggedIn') ?? false;
   }
 
   @override
@@ -232,53 +252,49 @@ class _LoginState extends State<Login> {
   }
 
   void _login() async {
-  if (_formKey.currentState?.validate() ?? false) {
-    setState(() {
-      isLoggingIn = true;
-    });
-
-    String email = _controllerEmail.text;
-    String password = _controllerPassword.text;
-
-    try {
-      User? user = await _auth.signInWithEmailAndPassword(email, password);
-
-      if (user != null) {
-        _boxLogin.put("loginStatus", true);
-        _boxLogin.put("userEmail", user.email);
-
-        // Store the email in SharedPreferences
-        SharedPreferences prefs = await SharedPreferences.getInstance();
-        await prefs.setString('userEmail', user.email ?? '');
-
-        // Navigate to Profile page
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => Profile(
-              userId: user.uid,
-            ),
-          ),
-        );
-      } else {
-        // Show error message if user is null
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Login failed. Please try again.')),
-        );
-      }
-    } catch (e) {
-      // Handle any errors here
-      print('Error during login: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('An error occurred: ${e.toString()}')),
-      );
-    } finally {
+    if (_formKey.currentState?.validate() ?? false) {
       setState(() {
-        isLoggingIn = false;
+        isLoggingIn = true;
       });
+
+      String email = _controllerEmail.text;
+      String password = _controllerPassword.text;
+
+      try {
+        User? user = await _auth.signInWithEmailAndPassword(email, password);
+
+        if (user != null) {
+          // Store login status and email in SharedPreferences
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          await prefs.setBool('isLoggedIn', true);
+          await prefs.setString('userEmail', user.email ?? '');
+
+          // Navigate to Profile page
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => Profile(
+                userId: user.uid,
+              ),
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Login failed. Please try again.')),
+          );
+        }
+      } catch (e) {
+        print('Error during login: $e');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('An error occurred: ${e.toString()}')),
+        );
+      } finally {
+        setState(() {
+          isLoggingIn = false;
+        });
+      }
     }
   }
-}
 
   void _loginWithGoogle() async {
     setState(() {
@@ -292,8 +308,10 @@ class _LoginState extends State<Login> {
     });
 
     if (user != null) {
-      _boxLogin.put("loginStatus", true);
-      _boxLogin.put("userEmail", user.email);
+      // Store login status and email in SharedPreferences
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('isLoggedIn', true);
+      await prefs.setString('userEmail', user.email ?? '');
 
       Navigator.pushReplacement(
         context,
