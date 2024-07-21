@@ -10,6 +10,7 @@ import 'login.dart';
 import 'settings_screen.dart';
 import 'edit_profile.dart';
 import 'statistics_screen.dart';
+import 'user_auth/firebase_auth_implementation/firebase_auth_services.dart';
 
 class Profile extends StatefulWidget {
   final String userId;
@@ -35,12 +36,26 @@ class _ProfileState extends State<Profile> {
   }
 
   Future<void> _loadUserData() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      username = prefs.getString('userName') ?? 'Username';
-      email = prefs.getString('userEmail') ?? 'email@example.com';
-    });
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  User? currentUser = FirebaseAuth.instance.currentUser;
+
+  setState(() {
+    email = currentUser?.email ?? prefs.getString('userEmail') ?? 'email@example.com';
+    username = currentUser?.displayName ?? prefs.getString('userName') ?? 'Username';
+  });
+
+  // If the username is still 'Username', try to fetch it from Firestore
+  if (username == 'Username') {
+    final FirebaseAuthService _auth = FirebaseAuthService();
+    String fetchedUsername = await _auth.getUsernameFromFirestore(widget.userId);
+    if (fetchedUsername.isNotEmpty) {
+      setState(() {
+        username = fetchedUsername;
+      });
+      await prefs.setString('userName', fetchedUsername);
+    }
   }
+}
 
   @override
   Widget build(BuildContext context) {

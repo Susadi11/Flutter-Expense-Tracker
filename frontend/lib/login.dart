@@ -3,6 +3,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:expense_tracker/user_auth/firebase_auth_implementation/firebase_auth_services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'signup.dart';
 import 'profile.dart';
 import 'forgot_password.dart';
@@ -231,24 +232,26 @@ class _LoginState extends State<Login> {
   }
 
   void _login() async {
-    if (_formKey.currentState?.validate() ?? false) {
-      setState(() {
-        isLoggingIn = true;
-      });
+  if (_formKey.currentState?.validate() ?? false) {
+    setState(() {
+      isLoggingIn = true;
+    });
 
-      String email = _controllerEmail.text;
-      String password = _controllerPassword.text;
+    String email = _controllerEmail.text;
+    String password = _controllerPassword.text;
 
+    try {
       User? user = await _auth.signInWithEmailAndPassword(email, password);
-
-      setState(() {
-        isLoggingIn = false;
-      });
 
       if (user != null) {
         _boxLogin.put("loginStatus", true);
         _boxLogin.put("userEmail", user.email);
 
+        // Store the email in SharedPreferences
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString('userEmail', user.email ?? '');
+
+        // Navigate to Profile page
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
@@ -258,10 +261,24 @@ class _LoginState extends State<Login> {
           ),
         );
       } else {
-        // The toast message will be shown by the FirebaseAuthService
+        // Show error message if user is null
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Login failed. Please try again.')),
+        );
       }
+    } catch (e) {
+      // Handle any errors here
+      print('Error during login: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('An error occurred: ${e.toString()}')),
+      );
+    } finally {
+      setState(() {
+        isLoggingIn = false;
+      });
     }
   }
+}
 
   void _loginWithGoogle() async {
     setState(() {

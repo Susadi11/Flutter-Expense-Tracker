@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:expense_tracker/user_auth/firebase_auth_implementation/firebase_auth_services.dart';
 import 'package:expense_tracker/toast.dart';
 import 'package:expense_tracker/home_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Signup extends StatefulWidget {
   const Signup({Key? key}) : super(key: key);
@@ -277,41 +278,45 @@ class _SignupState extends State<Signup> {
   }
 
   void _signUp() async {
-    if (_formKey.currentState?.validate() ?? false) {
-      setState(() {
-        isSigningUp = true;
-      });
+  if (_formKey.currentState?.validate() ?? false) {
+    setState(() {
+      isSigningUp = true;
+    });
 
-      String username = _controllerUsername.text;
-      String email = _controllerEmail.text;
-      String password = _controllerPassword.text;
+    String username = _controllerUsername.text;
+    String email = _controllerEmail.text;
+    String password = _controllerPassword.text;
 
-      User? user = await _auth.signUpWithEmailAndPassword(email, password);
+    User? user = await _auth.signUpWithEmailAndPassword(email, password);
 
-      setState(() {
-        isSigningUp = false;
-      });
+    setState(() {
+      isSigningUp = false;
+    });
 
-      if (user != null) {
-        // Store the username in Firebase
-        await user.updateDisplayName(username);
+    if (user != null) {
+      // Store the username in Firebase
+      await user.updateDisplayName(username);
 
-        _boxAccounts.put(username, password);
+      // Store the username in SharedPreferences
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString('userName', username);
 
-        showToast(message: "User is successfully created");
+      _boxAccounts.put(username, password);
 
-        // Navigate to home screen with user ID
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => HomeScreen(userId: user.uid),
-          ),
-        );
-      } else {
-        showToast(message: "Some error happened");
-      }
+      showToast(message: "User is successfully created");
+
+      // Navigate to home screen with user ID
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => HomeScreen(userId: user.uid),
+        ),
+      );
+    } else {
+      showToast(message: "Some error happened");
     }
   }
+}
 
   @override
   void dispose() {

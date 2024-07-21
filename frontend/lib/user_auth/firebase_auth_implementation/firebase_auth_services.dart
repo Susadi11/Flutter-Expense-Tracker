@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:expense_tracker/toast.dart';
@@ -63,6 +64,13 @@ class FirebaseAuthService {
         return null;
       }
     }
+
+    Future<String> getUsernameFromFirestore(String uid) async {
+  // Implement this method to fetch the username from Firestore
+  // This is just an example, adjust it based on your actual data structure
+  DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
+  return userDoc.get('username') ?? '';
+}
 
 
 }
