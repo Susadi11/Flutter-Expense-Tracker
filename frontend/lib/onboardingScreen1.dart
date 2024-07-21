@@ -72,12 +72,29 @@ class OnboardingScreen extends StatelessWidget {
       onDone: () => _finishOnboarding(context),
       onSkip: () => _finishOnboarding(context),
       showSkipButton: true,
-      skip: const Text("Skip"),
-      next: const Text("Next"),
-      done: const Text("Done", style: TextStyle(fontWeight: FontWeight.w600)),
+      skip: Text(
+        "Skip",
+        style: TextStyle(
+          color: Colors.black,
+        ),
+      ),
+      next: Text(
+        "Next",
+        style: TextStyle(
+          color: Colors.black,
+        ),
+      ),
+      done: Text(
+        "Done",
+        style: TextStyle(
+          fontWeight: FontWeight.w600,
+          color: Colors.black,
+        ),
+      ),
       dotsDecorator: DotsDecorator(
         size: Size(10.0, 10.0),
-        color: Color(0xFFBDBDBD),
+        color: Colors.black, // Color of inactive dots
+        activeColor: Color(0xFFC2AA81), // Color of active dot
         activeSize: Size(22.0, 10.0),
         activeShape: RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(25.0)),
