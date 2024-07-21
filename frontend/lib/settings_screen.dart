@@ -32,14 +32,8 @@ class SettingsScreen extends StatelessWidget {
             onChanged: (value) {
               themeNotifier.toggleTheme(); // Use instance method toggleTheme
             },
+            activeColor: Color(0xFFC2AA81), // Set the active color to FFC2AA81
           ),
-          /*SwitchListTile(
-            title: const Text('Enable Notifications'),
-            value: themeNotifier.notificationsEnabled,
-            onChanged: (value) {
-              themeNotifier.toggleNotifications(value); // Use instance method toggleNotifications
-            },
-          ),*/
         ],
       ),
     );
