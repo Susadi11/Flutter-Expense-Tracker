@@ -217,7 +217,7 @@ class _LoginState extends State<Login> {
                       color: Colors.grey,
                     ),
                     label: const Text(
-                      "Signup with Google",
+                      "Continue with Google",
                       style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                     ),
                   ),

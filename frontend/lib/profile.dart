@@ -321,14 +321,21 @@ class _TopPortionState extends State<_TopPortion> {
                       });
                       Navigator.of(context).pop();
                     },
-                    child: const Text('Remove'),
+                    child: const Text('Remove',
+                      style: TextStyle(
+                        color: Color(0xFFC2AA81),
+                      ),
+                    ),
                   ),
                   TextButton(
                     onPressed: () {
                       Navigator.of(context).pop();
                       _pickImage(ImageSource.gallery, imageType);
                     },
-                    child: const Text('Add New'),
+                    child: const Text('Add New',
+                      style: TextStyle(
+                        color: Color(0xFFC2AA81),
+                      ),),
                   ),
                 ],
               ),

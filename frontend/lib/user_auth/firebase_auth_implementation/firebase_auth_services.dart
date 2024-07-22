@@ -43,27 +43,32 @@ class FirebaseAuthService {
   }
 
   Future<User?> signInWithGoogle() async {
-      try {
-        final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-        if (googleUser == null) {
-          showToast(message: "Google sign-in was canceled");
-          return null;
-        }
-
-        final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-
-        final AuthCredential credential = GoogleAuthProvider.credential(
-          accessToken: googleAuth.accessToken,
-          idToken: googleAuth.idToken,
-        );
-
-        UserCredential userCredential = await _auth.signInWithCredential(credential);
-        return userCredential.user;
-      } catch (e) {
-        showToast(message: "Failed to sign in with Google");
-        return null;
-      }
+  try {
+    print("Attempting to sign in with Google");
+    final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+    if (googleUser == null) {
+      showToast(message: "Google sign-in was canceled");
+      print("Google sign-in was canceled");
+      return null;
     }
+
+    print("Google sign-in successful, user: ${googleUser.email}");
+    final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+    final AuthCredential credential = GoogleAuthProvider.credential(
+      accessToken: googleAuth.accessToken,
+      idToken: googleAuth.idToken,
+    );
+
+    print("GoogleAuth obtained, signing in with credential");
+    UserCredential userCredential = await _auth.signInWithCredential(credential);
+    print("Firebase sign-in successful, user: ${userCredential.user?.email}");
+    return userCredential.user;
+  } catch (e) {
+    showToast(message: "Failed to sign in with Google: ${e.toString()}");
+    print("Failed to sign in with Google: ${e.toString()}");
+    return null;
+  }
+}
 
     Future<String> getUsernameFromFirestore(String uid) async {
   // Implement this method to fetch the username from Firestore
