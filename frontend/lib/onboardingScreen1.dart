@@ -14,7 +14,7 @@ class OnboardingScreen extends StatelessWidget {
           image: Center(
             child: ClipRRect(
               borderRadius: BorderRadius.circular(15.0),
-              child: Image.asset("assets/images/onboarding1.png", height: 175.0),
+              child: Image.asset("assets/images/onboarding1.png", height: 200.0),
             ),
           ),
           decoration: PageDecoration(
@@ -29,7 +29,7 @@ class OnboardingScreen extends StatelessWidget {
           image: Center(
             child: ClipRRect(
               borderRadius: BorderRadius.circular(15.0),
-              child: Image.asset("assets/images/onboarding2.png", height: 175.0),
+              child: Image.asset("assets/images/onboarding2.png", height: 200.0),
             ),
           ),
           decoration: PageDecoration(
@@ -44,7 +44,7 @@ class OnboardingScreen extends StatelessWidget {
           image: Center(
             child: ClipRRect(
               borderRadius: BorderRadius.circular(15.0),
-              child: Image.asset("assets/images/onboarding3.png", height: 175.0),
+              child: Image.asset("assets/images/onboarding3.png", height: 200.0),
             ),
           ),
           decoration: PageDecoration(
@@ -59,7 +59,7 @@ class OnboardingScreen extends StatelessWidget {
           image: Center(
             child: ClipRRect(
               borderRadius: BorderRadius.circular(15.0),
-              child: Image.asset("assets/images/onboarding4.png", height: 175.0),
+              child: Image.asset("assets/images/onboarding4.png", height: 200.0),
             ),
           ),
           decoration: PageDecoration(

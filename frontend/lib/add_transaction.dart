@@ -119,11 +119,12 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
               children: <Widget>[
                 TextFormField(
                   controller: _titleController,
+                  cursorColor: Color(0xFFC2AA81),
                   decoration: InputDecoration(
                     labelText: 'Title',
                     border: OutlineInputBorder(),
                     focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: customColor),
+                      borderSide: BorderSide(color: Color(0xFFC2AA81)),
                     ),
                   ),
                   validator: (value) {
@@ -136,11 +137,12 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                 SizedBox(height: 16.0),
                 TextFormField(
                   controller: _amountController,
+                  cursorColor: Color(0xFFC2AA81),
                   decoration: InputDecoration(
                     labelText: 'Amount',
                     border: OutlineInputBorder(),
                     focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: customColor),
+                      borderSide: BorderSide(color: Color(0xFFC2AA81)),
                     ),
                   ),
                   keyboardType: TextInputType.number,
