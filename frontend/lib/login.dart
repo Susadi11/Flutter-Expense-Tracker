@@ -199,28 +199,6 @@ class _LoginState extends State<Login> {
                             style: TextStyle(color: _accentColor, fontSize: 16, fontWeight: FontWeight.bold),
                           ),
                   ),
-                  const SizedBox(height: 20),
-                  ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: _primaryColor,
-                      foregroundColor: Colors.white,
-                      minimumSize: const Size.fromHeight(50),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                    ),
-                    onPressed: () {
-                      _loginWithGoogle();
-                    },
-                    icon: const FaIcon(
-                      FontAwesomeIcons.google,
-                      color: Colors.grey,
-                    ),
-                    label: const Text(
-                      "Continue with Google",
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                    ),
-                  ),
                   const SizedBox(height: 10),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
