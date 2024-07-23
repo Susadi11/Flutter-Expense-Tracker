@@ -222,11 +222,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                 actions: [
                                   TextButton(
                                     onPressed: () => Navigator.of(ctx).pop(false),
-                                    child: Text('Cancel'),
+                                    child: Text('Cancel', style: TextStyle(color: const Color(0xFFC2AA81))),
                                   ),
                                   TextButton(
                                     onPressed: () => Navigator.of(ctx).pop(true),
-                                    child: Text('Delete'),
+                                    child: Text('Delete', style: TextStyle(color: const Color(0xFFC2AA81))),
                                   ),
                                 ],
                               ),
